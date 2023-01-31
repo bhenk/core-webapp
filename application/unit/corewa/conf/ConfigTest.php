@@ -1,10 +1,11 @@
 <?php
 
-namespace unit\core\conf;
+namespace unit\corewa\conf;
 
-use bhenk\core\conf\Config;
+use bhenk\corewa\conf\Config;
 use Exception;
 use PHPUnit\Framework\TestCase;
+use function dirname;
 use function get_class;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertIsArray;
@@ -16,6 +17,11 @@ use function PHPUnit\Framework\assertTrue;
 class ConfigTest extends TestCase {
 
     private string $config_file_01 = __DIR__ . DIRECTORY_SEPARATOR . "test_config01.php";
+
+    public function tearDown(): void {
+        $global_config = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . "global_config.php";
+        Config::load($global_config);
+    }
 
     public function testGet() {
         Config::reset();

@@ -1,6 +1,6 @@
 <?php
 
-namespace bhenk\core\conf;
+namespace bhenk\corewa\conf;
 
 use Exception;
 

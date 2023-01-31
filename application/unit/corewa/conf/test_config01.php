@@ -3,7 +3,7 @@
 return [
     "foo" => true,
     "bar" => false,
-    "unit\core\conf\ConfigTest" => [
+    "unit\corewa\conf\ConfigTest" => [
         "description" => "a unit test"
     ]
 ];

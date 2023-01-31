@@ -3,3 +3,4 @@
 /composer.phar
 /phpunit.phar
 /.phpunit.result.cache
+/application/logs/

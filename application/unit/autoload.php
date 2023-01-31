@@ -2,7 +2,7 @@
 
 namespace unit;
 
-use bhenk\core\conf\Config;
+use bhenk\corewa\conf\Config;
 
 /**
  * Running phpunit from commandline:
