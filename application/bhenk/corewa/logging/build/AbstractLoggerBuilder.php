@@ -9,7 +9,7 @@ use Monolog\Handler\FormattableHandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 
-abstract class AbstractLoggerBuilder {
+abstract class AbstractLoggerBuilder implements LoggerBuilderInterface {
 
     const CHANNEL = "channel";
     const LOG_FILE = "log_file";
@@ -29,11 +29,19 @@ abstract class AbstractLoggerBuilder {
         $this->config = $config;
     }
 
+    public static function createDefaultErr(): Logger {
+        $logger = new Logger("err");
+        $logger->pushHandler(new StreamHandler('php://stderr', 100));
+        return $logger;
+    }
+
     public static function createDefaultOut(): Logger {
         $logger = new Logger("out");
         $logger->pushHandler(new StreamHandler('php://stdout', 100));
         return $logger;
     }
+
+    public abstract function buildLogger(): Logger;
 
     /**
      * @throws Exception
@@ -47,6 +55,11 @@ abstract class AbstractLoggerBuilder {
         $this->config = $config;
     }
 
+    public function getWarnings(): array {
+        return $this->warnings;
+    }
+
+
     public function isQuiet(): bool {
         return $this->quiet;
     }
@@ -55,11 +68,15 @@ abstract class AbstractLoggerBuilder {
         $this->quiet = $quiet;
     }
 
-    public function getWarnings() {
-        return $this->warnings;
-    }
+    protected abstract function createFallBackLogger(): Logger;
 
-    public abstract function buildLogger(): Logger;
+    protected function addLineFormatter(array $config, FormattableHandlerInterface $handler): void {
+        if (isset($config[self::LINE_FORMAT])) {
+            $format = $config[self::LINE_FORMAT];
+            $date_format = $config[self::DATE_FORMAT] ?? null;
+            $handler->setFormatter(new LineFormatter($format, $date_format));
+        }
+    }
 
     protected function checkWarnings(?Logger $logger): Logger {
         if (is_null($logger)) {
@@ -77,22 +94,7 @@ abstract class AbstractLoggerBuilder {
             $logger = $this->createFallBackLogger();
         }
         return $logger;
-    }
 
-    public static function createDefaultErr(): Logger {
-        $logger = new Logger("err");
-        $logger->pushHandler(new StreamHandler('php://stderr', 100));
-        return $logger;
-    }
-
-    protected abstract function createFallBackLogger(): Logger;
-
-    protected function addLineFormatter(array $config, FormattableHandlerInterface $handler): void {
-        if (isset($config[self::LINE_FORMAT])) {
-            $format = $config[self::LINE_FORMAT];
-            $date_format = $config[self::DATE_FORMAT] ?? null;
-            $handler->setFormatter(new LineFormatter($format, $date_format));
-        }
     }
 
 }

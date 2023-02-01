@@ -63,8 +63,9 @@ class OutLoggerBuilderTest extends TestCase {
             "Expected a logger");
         assertEmpty($builder->getWarnings(),
             "Normal build process. No warnings expected");
-
-        //$logger->info("This should be formatted");
+        if (UNIT_IS_LOUD) {
+            $logger->info("This should be formatted");
+        }
     }
 
 
