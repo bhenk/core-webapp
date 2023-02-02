@@ -32,8 +32,9 @@ require_once $vendor_autoload;
 defined("UNIT_IS_LOUD")
 or define("UNIT_IS_LOUD", false);
 
-$config_file = __DIR__ . DIRECTORY_SEPARATOR . "global_config.php";
-Config::load($config_file);
+//$config_file = __DIR__ . DIRECTORY_SEPARATOR . "global_config.php";
+$config_file = __DIR__ . DIRECTORY_SEPARATOR . "unit_config.php";
+Config::load(APPLICATION_ROOT, $config_file);
 
 date_default_timezone_set('Europe/Amsterdam');
 

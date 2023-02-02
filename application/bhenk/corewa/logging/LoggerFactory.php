@@ -9,11 +9,8 @@ use bhenk\corewa\logging\build\LoggerBuilderInterface;
 use bhenk\corewa\logging\build\OutLoggerBuilder;
 use Exception;
 use Monolog\Logger;
-use PHPUnit\Framework\MockObject\IncompatibleReturnValueException;
 use Psr\Log\LoggerInterface;
 use function array_merge;
-use function count;
-use function var_dump;
 
 class LoggerFactory {
 
@@ -57,7 +54,7 @@ class LoggerFactory {
                 $this->customLoggers[$name] = $builder->buildLogger();
             } catch (Exception $e) {
                 $custom_warnings[] = $e->getMessage();
-                $custom_warnings[] = "Could not build custom logger '".$name."'. See above for details.";
+                $custom_warnings[] = "Could not build custom logger '" . $name . "'. See above for details.";
                 $this->customLoggers[$name] = AbstractLoggerBuilder::createDefaultOut();
             }
             $custom_warnings = array_merge($builder->getWarnings(), $custom_warnings);
@@ -79,7 +76,7 @@ class LoggerFactory {
         return $this->warnings;
     }
 
-    public function reset() :void {
+    public function reset(): void {
         $this->warnings = [];
         $this->loggers = [];
         $this->customLoggers = [];

@@ -10,12 +10,22 @@ return [
         "log_level" => Level::Debug,
         "line_format" => "%level_name% | %datetime% > %message% | %context% %extra%\n",
         "date_format" => "H:i:s:u",
+        "processors" => [
+            "bhenk\corewa\logging\build\MockProcessor" => []
+        ]
     ],
     "bhenk\corewa\logging\build\ErrLoggerBuilder" => [
         "channel" => "err",
         "log_level" => Level::Debug,
         "line_format" => "%level_name% | %datetime% > %message% | %context% %extra%\n",
         "date_format" => "H:i:s:u",
+        "processors" => [
+            //"Monolog\Processor\IntrospectionProcessor",
+            "bhenk\corewa\logging\build\MockProcessor" => [
+                42,
+                "br"
+            ]
+        ]
     ],
     "bhenk\corewa\logging\build\DefaultLoggerBuilder" => [
         "channel" => "default",

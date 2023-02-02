@@ -2,26 +2,30 @@
 
 namespace bhenk\corewa\conf;
 
+use bhenk\corewa\util\Path;
 use Exception;
 
 class Config {
 
     private static ?Config $instance = null;
+    private string $application_root;
+    private string $config_file;
     private array $config;
 
     /**
      * @throws Exception
      */
-    private function __construct(string $config_file) {
-        $this->config = require $config_file;
+    private function __construct(string $application_root, string $config_file) {
+        $this->application_root = $application_root;
+        $this->config_file = $config_file;
+        $this->config = require Path::makeAbsolute($config_file, $application_root);
     }
 
     /**
      * @throws Exception
      */
-    public static function load(string $config_file): Config {
-        if (!file_exists($config_file)) throw new Exception("File does not exist: " . $config_file);
-        self::$instance = new Config($config_file);
+    public static function load(string $application_root, string $config_file): Config {
+        self::$instance = new Config($application_root, $config_file);
         return self::$instance;
     }
 
@@ -40,6 +44,14 @@ class Config {
                 "Instance not loaded. Call " . Config::class . "::load(string \$file) before ::get()");
         }
         return self::$instance;
+    }
+
+    public function getApplicationRoot(): string {
+        return $this->application_root;
+    }
+
+    public function getConfigFile() {
+        return $this->config_file;
     }
 
     /**
