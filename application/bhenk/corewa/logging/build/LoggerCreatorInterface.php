@@ -2,10 +2,10 @@
 
 namespace bhenk\corewa\logging\build;
 
-use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 
 interface LoggerCreatorInterface {
 
-    function create(...$paras): Logger;
+    function create(...$paras): LoggerInterface;
 
 }

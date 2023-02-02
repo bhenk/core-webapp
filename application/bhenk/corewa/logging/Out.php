@@ -4,13 +4,13 @@ namespace bhenk\corewa\logging;
 
 class Out extends Log {
 
-    private static Type $type = Type::stdout;
+    private static string $type = "stdout";
 
-    public static function getType(): Type {
+    public static function getType(): string {
         return self::$type;
     }
 
-    public static function setType(Type $type): Type {
+    public static function setType(string $type): string {
         $previous = self::$type;
         self::$type = $type;
         return $previous;

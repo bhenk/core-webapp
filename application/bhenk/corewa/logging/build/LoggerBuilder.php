@@ -9,6 +9,7 @@ use Exception;
 use Monolog\Handler\FormattableHandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Psr\Log\LoggerInterface;
 use Throwable;
 use function array_keys;
 use function array_values;
@@ -65,7 +66,7 @@ class LoggerBuilder {
         $this->entries = [];
     }
 
-    public function build(string $name): Logger {
+    public function build(string $name): LoggerInterface {
         $this->warnings = [];
         $logger = null;
         try {
@@ -115,7 +116,7 @@ class LoggerBuilder {
     /**
      * @throws Exception
      */
-    private function createLogger(string $name, array $entry): Logger {
+    private function createLogger(string $name, array $entry): LoggerInterface {
         if (empty($entry)) {
             throw new Exception("Could not create logger. Empty entry");
         }
@@ -132,13 +133,14 @@ class LoggerBuilder {
     /**
      * @throws Exception
      */
-    private function createLoggerFromDefinition(string $name, array $definition): Logger {
+    private function createLoggerFromDefinition(string $name, array $definition): LoggerInterface {
         $channel = $definition["channel"] ?? $name;
         $logger = new Logger($channel);
         if (!isset($definition["handlers"])) {
             throw new Exception("No handlers set for logger '" . $name . "'");
         }
         $this->addHandlers($name, $logger, $definition["handlers"]);
+        if (isset($definition["processors"])) $this->addProcessors($name, $logger, $definition["processors"]);
         return $logger;
     }
 
@@ -152,6 +154,9 @@ class LoggerBuilder {
             }
             $class_name = $handler["class_name"];
             $paras = $handler["paras"] ?? [];
+            if (isset($paras["filename"])) {
+                $paras["filename"] = Path::makeAbsolute($paras["filename"], null, false);
+            }
             $object = Reflect::createObject($class_name, $paras);
             $logger->pushHandler($object);
 
@@ -179,7 +184,22 @@ class LoggerBuilder {
     /**
      * @throws Exception
      */
-    private function getLoggerFromCreator(string $name, array $creator): Logger {
+    private function addProcessors(string $name, Logger $logger, array $processors): void {
+        foreach ($processors as $key => $processor) {
+            if (!isset($processor["class_name"])) {
+                throw new Exception("No 'class_name' set on processor '" . $key . "' from entry '" . $name . "'");
+            }
+            $class_name = $processor["class_name"];
+            $paras = $processor["paras"] ?? [];
+            $object = Reflect::createObject($class_name, $paras);
+            $logger->pushProcessor($object);
+        }
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getLoggerFromCreator(string $name, array $creator): LoggerInterface {
         if (!isset($creator["class_name"])) {
             throw new Exception(
                 "No 'class_name' set on creator under entry '" . $name . "'");

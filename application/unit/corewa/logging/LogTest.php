@@ -11,7 +11,6 @@ use function PHPUnit\Framework\assertTrue;
 class LogTest extends TestCase {
 
     public function testStatic() {
-        // !! uses unit/global_config.php
         if (UNIT_IS_LOUD) {
             Out::debug("test succeeded " . get_class($this));
             Out::info("test succeeded " . get_class($this));

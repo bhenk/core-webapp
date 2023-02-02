@@ -13,7 +13,7 @@ class Path {
     /**
      * @throws Exception
      */
-    public static function makeAbsolute(string $path, ?string $application_root = null): string {
+    public static function makeAbsolute(string $path, ?string $application_root = null, bool $must_exist = true): string {
         if (is_null($application_root)) {
             $application_root = Config::get()->getApplicationRoot();
         }
@@ -22,7 +22,7 @@ class Path {
         if (!str_starts_with($path, DIRECTORY_SEPARATOR)) {
             $path = $application_root . DIRECTORY_SEPARATOR . $path;
         }
-        if (!file_exists($path))
+        if (!file_exists($path) and $must_exist)
             throw new Exception("File does not exists: '" . $path . "'");
         return $path;
     }

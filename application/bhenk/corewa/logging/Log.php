@@ -6,13 +6,13 @@ use Stringable;
 
 class Log {
 
-    private static Type $type = Type::default;
+    private static string $type = "default";
 
-    public static function getType(): Type {
+    public static function getType(): string {
         return self::$type;
     }
 
-    public static function setType(Type $type): Type {
+    public static function setType(string $type): string {
         $previous = self::$type;
         self::$type = $type;
         return $previous;

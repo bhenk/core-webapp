@@ -6,8 +6,9 @@ use bhenk\corewa\conf\Config;
 use bhenk\corewa\logging\build\LoggerBuilder;
 use Monolog\Handler\StreamHandler;
 use Monolog\Level;
-use Monolog\Logger;
+use Monolog\Processor\IntrospectionProcessor;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LoggerInterface;
 use function end;
 use function get_class;
 use function PHPUnit\Framework\assertEmpty;
@@ -25,6 +26,7 @@ class LoggerBuilderTest extends TestCase {
     public function setUp(): void {
         $this->application_root = Config::get()->getApplicationRoot();
         $this->config_file = Config::get()->getConfigFile();
+        LoggerBuilder::get()->reset();
     }
 
     public function tearDown(): void {
@@ -41,7 +43,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("not of interest");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertNotEmpty($warnings);
         assertStringStartsWith("File does not exists", $warnings[0]);
         assertStringStartsWith("Could not create logger.", end($warnings));
@@ -55,7 +57,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("foobar");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertNotEmpty($warnings);
         assertStringStartsWith("Entry 'foobar' not found.", $warnings[0]);
         assertStringStartsWith("Could not create logger.", end($warnings));
@@ -73,7 +75,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("fooLogger");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertNotEmpty($warnings);
         assertStringStartsWith("Unknown key: 'wrong wrong'.", $warnings[0]);
         assertStringStartsWith("Could not create logger.", end($warnings));
@@ -93,7 +95,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("emptyDef");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertNotEmpty($warnings);
         assertStringStartsWith("No handlers set for logger 'emptyDef'", $warnings[0]);
         assertStringStartsWith("Could not create logger.", end($warnings));
@@ -118,7 +120,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("noClass");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertNotEmpty($warnings);
         assertStringStartsWith("No 'class_name' set on handler 'handler01' from entry 'noClass'", $warnings[0]);
         assertStringStartsWith("Could not create logger.", end($warnings));
@@ -143,7 +145,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("success");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertEquals("Monolog\Handler\FirePHPHandler", get_class($logger->getHandlers()[0]));
         assertEmpty($warnings);
     }
@@ -173,7 +175,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("withStream");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertEquals("Monolog\Handler\StreamHandler", get_class($logger->getHandlers()[0]));
         assertEmpty($warnings);
         //$logger->notice(get_class($this) . "->" . __FUNCTION__);
@@ -214,13 +216,57 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("withFormat");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         /** @var StreamHandler $handler */
         $handler = $logger->getHandlers()[0];
         assertEquals("Monolog\Handler\StreamHandler", get_class($handler));
         assertEquals("Monolog\Formatter\LineFormatter", get_class($handler->getFormatter()));
         assertEmpty($warnings);
         //$logger->notice(get_class($this) . "->" . __FUNCTION__);
+    }
+
+    public function testBuildWithProcessor() {
+        $entry = [
+            "definition" => [
+                "channel" => "chan",
+                "handlers" => [
+                    "handler01" => [
+                        "class_name" => "Monolog\Handler\StreamHandler",
+                        "paras" => [
+                            "stream" => "php://stdout",
+                            "level" => Level::Debug,
+                            "bubble" => true,
+                            "filePermission" => null,
+                            "useLocking" => false,
+                        ],
+                    ],
+                ],
+                "processors" => [
+                    "processor01" => [
+                        "class_name" => "Monolog\Processor\IntrospectionProcessor",
+                        "paras" => [
+                            "level" => Level::Error,
+                            "skipClassesPartials" => [],
+                            "skipStackFramesCount" => 0,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+        $builder = LoggerBuilder::get();
+        $builder->addEntry("withProcessor", $entry);
+        //
+        $builder->setQuiet(false);
+        $logger = $builder->build("withProcessor");
+        $warnings = $builder->getWarnings();
+
+        assertInstanceOf(LoggerInterface::class, $logger);
+        /** @var IntrospectionProcessor $processorr */
+        $processor = $logger->getProcessors()[0];
+        assertEquals("Monolog\Processor\IntrospectionProcessor", get_class($processor));
+        assertEmpty($warnings);
+        //$logger->notice(get_class($this) . "->" . __FUNCTION__);
+        //$logger->error(get_class($this) . "->" . __FUNCTION__);
     }
 
     public function testBuildWithCreator() {
@@ -237,7 +283,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("try_creator");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertEmpty($warnings);
         assertTrue(DummyCreator::wasCalled());
         assertEquals([], DummyCreator::getParas());
@@ -263,7 +309,7 @@ class LoggerBuilderTest extends TestCase {
         $logger = $builder->build("try_paras");
         $warnings = $builder->getWarnings();
 
-        assertInstanceOf(Logger::class, $logger);
+        assertInstanceOf(LoggerInterface::class, $logger);
         assertEmpty($warnings);
         assertTrue(DummyCreator::wasCalled());
         $expected = [
