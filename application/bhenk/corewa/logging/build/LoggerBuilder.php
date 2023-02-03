@@ -100,7 +100,7 @@ class LoggerBuilder {
         if (empty($this->entries)) {
             $config = Config::get()->getConfigurationFor(get_class($this));
             $logger_definition_file = $config["logger_definition_file"];
-            $this->entries = require Path::makeAbsolute($logger_definition_file);
+            $this->entries = require Config::get()->makeAbsolute($logger_definition_file);
         }
     }
 
@@ -155,7 +155,7 @@ class LoggerBuilder {
             $class_name = $handler["class_name"];
             $paras = $handler["paras"] ?? [];
             if (isset($paras["filename"])) {
-                $paras["filename"] = Path::makeAbsolute($paras["filename"], null, false);
+                $paras["filename"] = Config::get()->makeAbsolute($paras["filename"], false);
             }
             $object = Reflect::createObject($class_name, $paras);
             $logger->pushHandler($object);

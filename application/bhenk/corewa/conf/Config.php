@@ -2,8 +2,10 @@
 
 namespace bhenk\corewa\conf;
 
-use bhenk\corewa\util\Path;
 use Exception;
+use function file_exists;
+use function is_null;
+use function realpath;
 
 class Config {
 
@@ -18,7 +20,7 @@ class Config {
     private function __construct(string $application_root, string $config_file) {
         $this->application_root = $application_root;
         $this->config_file = $config_file;
-        $this->config = require Path::makeAbsolute($config_file, $application_root);
+        $this->config = require self::absolute($config_file, $application_root);
     }
 
     /**
@@ -46,11 +48,32 @@ class Config {
         return self::$instance;
     }
 
+    /**
+     * @throws Exception
+     */
+    private static function absolute(string $path, ?string $application_root, bool $must_exist = true): string {
+        if ($path == "" or $path == "/")
+            throw new Exception("Argument cannot be empty string: \$config_file : '" . $path . "'");
+        if (!str_starts_with($path, DIRECTORY_SEPARATOR)) {
+            $path = $application_root . DIRECTORY_SEPARATOR . $path;
+        }
+        if (!file_exists($path) and $must_exist)
+            throw new Exception("File does not exists: '" . $path . "'");
+        return realpath($path);
+    }
+
     public function getApplicationRoot(): string {
         return $this->application_root;
     }
 
-    public function getConfigFile() {
+    /**
+     * @throws Exception
+     */
+    public function makeAbsolute(string $path, bool $must_exist = true): string {
+        return self::absolute($path, $this->application_root, $must_exist);
+    }
+
+    public function getConfigFile(): string {
         return $this->config_file;
     }
 
