@@ -17,7 +17,7 @@ use function PHPUnit\Framework\assertInstanceOf;
 
 class ConsoleHandlerTest extends TestCase {
 
-    private bool $loud = false;
+    private bool $loud = true;
 
     public function testHandler() {
         $ch = new ConsoleHandler();

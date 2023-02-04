@@ -15,34 +15,14 @@ use function str_pad;
 use function strrpos;
 use function substr;
 
-enum Colors: string {
-    case debug = "\033[1;90m ";
-    case info = "\033[1;36m ";
-    case notice = "\033[1;34m ";
-    case warning = "\033[1;35m ";
-    case error = "\033[1;31m\033[103m ";
-    case critical = "\033[1;97m\033[41m ";
-    case alert = "\033[1;97m\033[105m ";
-    case emergency = "\033[1;97m\033[1;101m ";
 
-    public static function fromName(string $name): string {
-        $result = "";
-        foreach (self::cases() as $level) {
-            if ($name === $level->name) {
-                $result = $level->value;
-                break;
-            }
-        }
-        return $result;
-    }
-}
 
 class ConsoleHandler extends AbstractHandler {
 
     private const C_RESET = " \033[0m";
-    private const C_GREEN = "\033[0;32m";
-    private const C_BLUE = "\033[0;34m";
-    private const C_FAT_GRAY = "\033[1;90m";
+    private const C_GREEN =  ""; //"\033[0;32m";
+    private const C_BLUE = ""; //"\033[0;34m";
+    private const C_FAT_GRAY = ""; //"\033[1;90m";
     private const C_FAT_RED = "\033[1;31m";
     private int $count = 0;
 
@@ -103,7 +83,7 @@ class ConsoleHandler extends AbstractHandler {
             if ($val instanceof Throwable) {
                 self::printThrowable($val, $indent);
             } else {
-                print_r($indent . self::C_GREEN . "context: " . $key . " => " . self::C_RESET . $val . "\n");
+                print_r(self::C_GREEN . $indent . "context: " . $key . " => " . self::C_RESET . $val . "\n");
             }
         }
 
@@ -112,7 +92,7 @@ class ConsoleHandler extends AbstractHandler {
             if ($val instanceof Throwable) {
                 self::printThrowable($val, $indent);
             } else {
-                print_r($indent . self::C_BLUE . "extra:   " . $key . " => " . self::C_RESET . $val . "\n");
+                print_r(self::C_BLUE . $indent . "extra:   " . $key . " => " . self::C_RESET . $val . "\n");
             }
         }
 
