@@ -11,7 +11,6 @@ class LoggerFactory {
 
     private static ?LoggerFactory $instance = null;
     private array $loggers = [];
-
     private array $warnings = [];
 
     public static function get(): LoggerFactory {
