@@ -108,7 +108,11 @@ class ConsoleHandler extends AbstractHandler {
     }
 
     private function printThrowable(Throwable $t, string $indent): void {
-        print_r("\033[01;31m" . $indent . $this->exclamation . " " . get_class($t) . "\033[0m\n");
+        print_r("\033[01;31m" . $indent
+            . $this->exclamation
+            . " " . get_class($t)
+            . " [code: " . $t->getCode() . "]"
+            . "\033[0m\n");
         print_r($indent . " Thrown by: file://" . $t->getFile() . ":" . $t->getLine() . "\n");
         print_r($indent . " Message: " . $t->getMessage() . "\n");
         print_r($indent . " Stacktrace:\n");
