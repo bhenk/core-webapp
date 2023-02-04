@@ -3,6 +3,7 @@
 namespace bhenk\corewa\logging;
 
 use bhenk\corewa\logging\build\LoggerBuilder;
+use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use function array_merge;
 
@@ -38,6 +39,10 @@ class LoggerFactory {
     public function reset(): void {
         $this->warnings = [];
         $this->loggers = [];
+    }
+
+    public function setLogger(string $name, Logger $logger): void {
+        $this->loggers[$name] = $logger;
     }
 
 }

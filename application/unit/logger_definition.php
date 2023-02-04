@@ -22,20 +22,10 @@ return [
                         "paras" => [
                             "format" => "%level_name% | %datetime% > %message% | %context% %extra%\n",
                             "dateFormat" => "H:i:s:u",
-                            "allowInlineLineBreaks" => false,
+                            "allowInlineLineBreaks" => true,
                             "ignoreEmptyContextAndExtra" => false,
-                            "includeStacktraces" => false
+                            "includeStacktraces" => true
                         ],
-                    ],
-                ],
-            ],
-            "processors" => [
-                "processor01" => [
-                    "class_name" => "Monolog\Processor\IntrospectionProcessor",
-                    "paras" => [
-                        "level" => Level::Error,
-                        "skipClassesPartials" => [],
-                        "skipStackFramesCount" => 1,
                     ],
                 ],
             ],
@@ -59,9 +49,9 @@ return [
                         "paras" => [
                             "format" => "%level_name% | %datetime% > %message% | %context% %extra%\n",
                             "dateFormat" => "H:i:s:u",
-                            "allowInlineLineBreaks" => false,
+                            "allowInlineLineBreaks" => true,
                             "ignoreEmptyContextAndExtra" => false,
-                            "includeStacktraces" => false
+                            "includeStacktraces" => true
                         ],
                     ],
                 ],
@@ -97,9 +87,9 @@ return [
                         "paras" => [
                             "format" => "%level_name% | %datetime% > %message% | %context% %extra%\n",
                             "dateFormat" => "H:i:s:u",
-                            "allowInlineLineBreaks" => false,
+                            "allowInlineLineBreaks" => true,
                             "ignoreEmptyContextAndExtra" => false,
-                            "includeStacktraces" => false
+                            "includeStacktraces" => true
                         ],
                     ],
                 ],

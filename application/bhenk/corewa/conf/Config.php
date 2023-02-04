@@ -5,7 +5,6 @@ namespace bhenk\corewa\conf;
 use Exception;
 use function file_exists;
 use function is_null;
-use function realpath;
 
 class Config {
 
@@ -53,13 +52,13 @@ class Config {
      */
     private static function absolute(string $path, ?string $application_root, bool $must_exist = true): string {
         if ($path == "" or $path == "/")
-            throw new Exception("Argument cannot be empty string: \$config_file : '" . $path . "'");
+            throw new Exception("Argument cannot be empty string: \$path : '" . $path . "'");
         if (!str_starts_with($path, DIRECTORY_SEPARATOR)) {
             $path = $application_root . DIRECTORY_SEPARATOR . $path;
         }
         if (!file_exists($path) and $must_exist)
             throw new Exception("File does not exists: '" . $path . "'");
-        return realpath($path);
+        return $path;
     }
 
     public function getApplicationRoot(): string {

@@ -8,7 +8,7 @@ use function defined;
 
 /**
  * Running phpunit from CLI:
- * $ phpunit --bootstrap unit/autoload.php unit
+ * $ phpunit --bootstrap unit/bootstrap.php unit
  *
  * Running phpunit from phpStorm:
  * make sure this file is set in settings>PHP>Test Frameworks,
