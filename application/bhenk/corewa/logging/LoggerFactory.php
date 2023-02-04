@@ -41,8 +41,10 @@ class LoggerFactory {
         $this->loggers = [];
     }
 
-    public function setLogger(string $name, Logger $logger): void {
+    public function setLogger(string $name, Logger $logger): ?Logger {
+        $previous = $this->loggers[$name] ?? null;
         $this->loggers[$name] = $logger;
+        return $previous;
     }
 
 }

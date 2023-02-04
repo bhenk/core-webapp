@@ -23,13 +23,14 @@ enum Colors: string {
     case error = "\033[1;31m\033[103m ";
     case critical = "\033[1;97m\033[41m ";
     case alert = "\033[1;97m\033[105m ";
-    case emergency = "\033[1;97m\033[101m ";
+    case emergency = "\033[1;97m\033[1;101m ";
 
     public static function fromName(string $name): string {
         $result = "";
         foreach (self::cases() as $level) {
             if ($name === $level->name) {
                 $result = $level->value;
+                break;
             }
         }
         return $result;
@@ -38,7 +39,12 @@ enum Colors: string {
 
 class ConsoleHandler extends AbstractHandler {
 
-    const C_RESET = " \033[0m";
+    private const C_RESET = " \033[0m";
+    private const C_GREEN = "\033[0;32m";
+    private const C_BLUE = "\033[0;34m";
+    private const C_FAT_GRAY = "\033[1;90m";
+    private const C_FAT_RED = "\033[1;31m";
+    private int $count = 0;
 
     /**
      *
@@ -46,13 +52,16 @@ class ConsoleHandler extends AbstractHandler {
      * @param bool $bubble
      * @param string $date_format
      * @param string $stack_match
+     * @param bool $white_line
      * @param string $exclamation
      */
-    public function __construct(int|string|Level $level = Level::Debug,
-                                bool             $bubble = true,
-                                private string   $date_format = "H:i:s:u",
-                                private string   $stack_match = "/(.*?)/i",
-                                private string   $exclamation = "chips!") {
+    public function __construct(int|string|Level        $level = Level::Debug,
+                                bool                    $bubble = true,
+                                private readonly string $date_format = "H:i:s:u",
+                                private readonly string $stack_match = "/(.*?)/i",
+                                private readonly bool   $white_line = true,
+                                private readonly string $exclamation = "chips!"
+    ) {
         parent::__construct($level, $bubble);
     }
 
@@ -62,6 +71,7 @@ class ConsoleHandler extends AbstractHandler {
     public function handle(LogRecord $record): bool {
         if (!$this->isHandling($record)) return $this->getBubble();
 
+        $this->count += 1;
         $level = $record->level->toPsrLogLevel();
         $color = Colors::fromName($level);
         $level = str_pad(strtoupper($level), 9);
@@ -78,11 +88,13 @@ class ConsoleHandler extends AbstractHandler {
 
         $row = $color . $level . self::C_RESET
             . " " . $date
-            . " \033[1;90m[" . $class . $type . $function . "() $line]" . self::C_RESET
+            . " " . self::C_FAT_GRAY . "[" . $class . $type . $function . "() $line]" . self::C_RESET
             . "> " . $message
             . "\n";
         $click = "file://" . $arr_file["file"] . ":" . $line . "\n";
 
+        if ($this->white_line) print_r("\n");
+        print_r($this->count . " ");
         print_r($row);
         print_r($click);
 
@@ -91,7 +103,7 @@ class ConsoleHandler extends AbstractHandler {
             if ($val instanceof Throwable) {
                 self::printThrowable($val, $indent);
             } else {
-                print_r($indent . "\033[0;32mcontext: " . $key . " => \033[0m " . $val . "\n");
+                print_r($indent . self::C_GREEN . "context: " . $key . " => " . self::C_RESET . $val . "\n");
             }
         }
 
@@ -100,7 +112,7 @@ class ConsoleHandler extends AbstractHandler {
             if ($val instanceof Throwable) {
                 self::printThrowable($val, $indent);
             } else {
-                print_r($indent . "\033[0;34mextra  : " . $key . " => \033[0m " . $val . "\n");
+                print_r($indent . self::C_BLUE . "extra:   " . $key . " => " . self::C_RESET . $val . "\n");
             }
         }
 
@@ -108,11 +120,11 @@ class ConsoleHandler extends AbstractHandler {
     }
 
     private function printThrowable(Throwable $t, string $indent): void {
-        print_r("\033[01;31m" . $indent
+        print_r(self::C_FAT_RED . $indent
             . $this->exclamation
             . " " . get_class($t)
             . " [code: " . $t->getCode() . "]"
-            . "\033[0m\n");
+            . self::C_RESET . "\n");
         print_r($indent . " Thrown by: file://" . $t->getFile() . ":" . $t->getLine() . "\n");
         print_r($indent . " Message: " . $t->getMessage() . "\n");
         print_r($indent . " Stacktrace:\n");

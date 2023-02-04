@@ -31,12 +31,14 @@ class ConsoleHandlerTest extends TestCase {
             true,
             "H:i:s:u",
             "/application\/(bhenk|unit)/i",
+            true,
             "chips!"
         );
         $logger = new Logger("unit");
         $logger->pushHandler($ch);
         Out::notice("Changing logger for Out");
-        LoggerFactory::get()->setLogger("stdout", $logger);
+
+        $previous_logger = LoggerFactory::get()->setLogger("stdout", $logger);
         Out::debug("Changed logger for Out");
         $this->stack01();
         Out::debug("Testing colors");
@@ -47,6 +49,7 @@ class ConsoleHandlerTest extends TestCase {
         Out::critical("Testing colors");
         Out::alert("Testing colors");
         Out::emergency("Testing colors");
+        LoggerFactory::get()->setLogger("stdout", $previous_logger);
     }
 
     private function stack01(): void {

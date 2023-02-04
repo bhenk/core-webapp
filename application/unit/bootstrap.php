@@ -7,8 +7,8 @@ use function define;
 use function defined;
 
 /**
- * Running phpunit from CLI:
- * $ phpunit --bootstrap unit/bootstrap.php unit
+ * Running phpunit in CLI (from project root):
+ * $ phpunit --bootstrap application/unit/bootstrap.php application/unit
  *
  * Running phpunit from phpStorm:
  * make sure this file is set in settings>PHP>Test Frameworks,

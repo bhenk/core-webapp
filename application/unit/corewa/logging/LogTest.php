@@ -2,7 +2,6 @@
 
 namespace unit\corewa\logging;
 
-use ArgumentCountError;
 use bhenk\corewa\logging\Out;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertTrue;
@@ -18,7 +17,6 @@ class LogTest extends TestCase {
     }
 
     public function tatic() {
-        Out::warning("test succeeded?? ", [new ArgumentCountError("exception message")]);
         if (UNIT_IS_LOUD) {
             Out::debug("debug test succeeded ");
 //            Out::info("test succeeded " . get_class($this));

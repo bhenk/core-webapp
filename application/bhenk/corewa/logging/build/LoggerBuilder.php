@@ -3,7 +3,6 @@
 namespace bhenk\corewa\logging\build;
 
 use bhenk\corewa\conf\Config;
-use bhenk\corewa\util\Path;
 use bhenk\corewa\util\Reflect;
 use Exception;
 use Monolog\Handler\FormattableHandlerInterface;
