@@ -5,6 +5,7 @@
  *
  * @see \bhenk\corewa\logging\handle\ConsoleHandler::$color_scheme
  */
+
 return [
     "debug" => "\033[38;5;100m",
     "info" => "\033[38;5;107m",

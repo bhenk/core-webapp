@@ -2,6 +2,8 @@
 
 namespace bhenk\corewa\logging\handle;
 
+use bhenk\corewa\logging\Log;
+use bhenk\corewa\logging\LoggerFactory;
 use Monolog\Handler\AbstractHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
@@ -17,7 +19,7 @@ use function substr;
 
 
 /**
- *
+ * Handler class for displaying log output on console.
  */
 class ConsoleHandler extends AbstractHandler {
 
@@ -27,22 +29,31 @@ class ConsoleHandler extends AbstractHandler {
     /**
      * Displays log output on console.
      *
+     * This handler is especially equipped to be used during development. See {@link LoggerFactory::setLogger()}
+     * or {@link Log::setType()} on how to temporarily change the log output of the entire application.
+     *
      * The {@link $stack_match} parameter expects a regular expression. It can be used to suppress the amount of
-     * stacktrace elements of {@link Throwable}s.
+     * stacktrace elements of {@link Throwable}s. Par example:
+     * <code>"/application\/(bhenk|unit)/i"</code> will only print traces of files that have either
+     * <code>/application/bhenk</code> or <code>/application/unit</code> in their filename.
+     * Defaults to <code>"/(.*?)/i"</code> - all files.
      *
-     * The {@link $color_scheme} defaults to
+     * The {@link $date_format} defaults to a short <code>"H:i:s:u"</code>.
      *
+     * The {@link $color_scheme} defaults to ConsoleColors.php, a dark theme.
+     *
+     * See also {@link AbstractHandler}.
      *
      * @param int|string|Level $level accepted minimum logging level
-     * @param bool $bubble allow records to bubble up the stack
+     * @param bool $bubble controls the bubbling process of the handler stack
      * @param bool $white_line print empty line above each log statement (default true)
-     * @param string|null $stack_match reg-ex to match filenames in stack traces (default "/(.*?)/i" - all files)
-     * @param string|null $date_format date format for printed log statements (default "H:i:s:u")
+     * @param string|null $stack_match reg-ex to match filenames in stack traces
+     * @param string|null $date_format date format for printed log statements
      * @param string|null $exclamation thrown in when a throwable is reported
      * @param string|null $color_scheme color scheme for this handler
      */
     public function __construct(int|string|Level      $level = Level::Debug,
-                                bool                  $bubble = true,
+                                bool                  $bubble = false,
                                 private readonly bool $white_line = true,
                                 private ?string       $stack_match = null,
                                 private ?string       $date_format = null,
