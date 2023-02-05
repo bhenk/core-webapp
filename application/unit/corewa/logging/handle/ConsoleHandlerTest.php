@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 
 namespace unit\corewa\logging\handle;
 
@@ -17,7 +17,7 @@ use function PHPUnit\Framework\assertInstanceOf;
 
 class ConsoleHandlerTest extends TestCase {
 
-    private bool $loud = true;
+    private bool $loud = false;
 
     public function testHandler() {
         $ch = new ConsoleHandler();
@@ -29,10 +29,11 @@ class ConsoleHandlerTest extends TestCase {
         $ch = new ConsoleHandler(
             Level::Debug,
             true,
-            "H:i:s:u",
-            "/application\/(bhenk|unit)/i",
             true,
-            "chips!"
+            "/application\/(bhenk|unit)/i",
+            null,
+            null,
+            null
         );
         $logger = new Logger("unit");
         $logger->pushHandler($ch);
@@ -55,7 +56,8 @@ class ConsoleHandlerTest extends TestCase {
     private function stack01(): void {
         $foo = new class implements Stringable {
             public function __toString(): string {
-                return "foo\n\033[0;42m \033[3;97mbar \033[0m";
+                return "Object __toString() bla bla";
+                // return "foo\033[0;42m \033[3;97mb\nar \033[0m";
             }
         };
         assertInstanceOf(Stringable::class, $foo);

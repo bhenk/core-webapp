@@ -16,33 +16,45 @@ use function strrpos;
 use function substr;
 
 
-
+/**
+ *
+ */
 class ConsoleHandler extends AbstractHandler {
 
-    private const C_RESET = " \033[0m";
-    private const C_GREEN =  ""; //"\033[0;32m";
-    private const C_BLUE = ""; //"\033[0;34m";
-    private const C_FAT_GRAY = ""; //"\033[1;90m";
-    private const C_FAT_RED = "\033[1;31m";
+    private array $console_colors;
     private int $count = 0;
 
     /**
+     * Displays log output on console.
      *
-     * @param int|string|Level $level
-     * @param bool $bubble
-     * @param string $date_format
-     * @param string $stack_match
-     * @param bool $white_line
-     * @param string $exclamation
+     * The {@link $stack_match} parameter expects a regular expression. It can be used to suppress the amount of
+     * stacktrace elements of {@link Throwable}s.
+     *
+     * The {@link $color_scheme} defaults to
+     *
+     *
+     * @param int|string|Level $level accepted minimum logging level
+     * @param bool $bubble allow records to bubble up the stack
+     * @param bool $white_line print empty line above each log statement (default true)
+     * @param string|null $stack_match reg-ex to match filenames in stack traces (default "/(.*?)/i" - all files)
+     * @param string|null $date_format date format for printed log statements (default "H:i:s:u")
+     * @param string|null $exclamation thrown in when a throwable is reported
+     * @param string|null $color_scheme color scheme for this handler
      */
-    public function __construct(int|string|Level        $level = Level::Debug,
-                                bool                    $bubble = true,
-                                private readonly string $date_format = "H:i:s:u",
-                                private readonly string $stack_match = "/(.*?)/i",
-                                private readonly bool   $white_line = true,
-                                private readonly string $exclamation = "chips!"
+    public function __construct(int|string|Level      $level = Level::Debug,
+                                bool                  $bubble = true,
+                                private readonly bool $white_line = true,
+                                private ?string       $stack_match = null,
+                                private ?string       $date_format = null,
+                                private ?string       $exclamation = null,
+                                private ?string       $color_scheme = null
     ) {
         parent::__construct($level, $bubble);
+        if (is_null($this->date_format)) $this->date_format = "H:i:s:u";
+        if (is_null($this->stack_match)) $this->stack_match = "/(.*?)/i";
+        if (is_null($this->exclamation)) $this->exclamation = "chips!";
+        if (is_null($this->color_scheme)) $this->color_scheme = __DIR__ . DIRECTORY_SEPARATOR . "ConsoleColors.php";
+        $this->console_colors = require $this->color_scheme;
     }
 
     /**
@@ -52,8 +64,9 @@ class ConsoleHandler extends AbstractHandler {
         if (!$this->isHandling($record)) return $this->getBubble();
 
         $this->count += 1;
+        $cc = $this->console_colors;
         $level = $record->level->toPsrLogLevel();
-        $color = Colors::fromName($level);
+        $level_color = $cc[$level];
         $level = str_pad(strtoupper($level), 9);
         $date = $record->datetime->format($this->date_format);
         $message = $record->message;
@@ -66,61 +79,65 @@ class ConsoleHandler extends AbstractHandler {
         $function = $a_caller["function"];
         $line = $arr_file["line"];
 
-        $row = $color . $level . self::C_RESET
-            . " " . $date
-            . " " . self::C_FAT_GRAY . "[" . $class . $type . $function . "() $line]" . self::C_RESET
-            . "> " . $message
-            . "\n";
-        $click = "file://" . $arr_file["file"] . ":" . $line . "\n";
+        $row = "$level_color $level " . $cc["reset"]
+            . $cc["date"] . " $date " . $cc["reset"]
+            . $cc['class'] . " [$class$type$function() $line] " . $cc["reset"]
+            . "> " . $message . $cc["reset"]
+            . $cc["nl"];
+        $click = $cc["file"] . "file://" . $arr_file["file"] . ":$line" . $cc["reset"] . $cc["nl"];
 
-        if ($this->white_line) print_r("\n");
-        print_r($this->count . " ");
+        print_r($cc["reset"]);
+        if ($this->white_line) print_r($cc["nl"]);
+        print_r("$this->count ");
         print_r($row);
         print_r($click);
 
-        foreach ($record->context as $key => $val) {
-            $indent = "  ";
-            if ($val instanceof Throwable) {
-                self::printThrowable($val, $indent);
-            } else {
-                print_r(self::C_GREEN . $indent . "context: " . $key . " => " . self::C_RESET . $val . "\n");
-            }
-        }
+        $this->printArray($record->context, "context", $cc);
+        $this->printArray($record->extra, "extra", $cc);
 
-        foreach ($record->extra as $key => $val) {
-            $indent = "  ";
-            if ($val instanceof Throwable) {
-                self::printThrowable($val, $indent);
-            } else {
-                print_r(self::C_BLUE . $indent . "extra:   " . $key . " => " . self::C_RESET . $val . "\n");
-            }
-        }
-
+        print_r("\033[0m");
         return $this->getBubble();
     }
 
-    private function printThrowable(Throwable $t, string $indent): void {
-        print_r(self::C_FAT_RED . $indent
-            . $this->exclamation
+    private function printArray(array $arr, string $word, array $cc): void {
+        foreach ($arr as $key => $val) {
+            $indent = "  ";
+            if ($val instanceof Throwable) {
+                self::printThrowable($val, $indent, $cc);
+            } else {
+                print_r($indent . $cc[$word] . " $word: $key => " . $cc["reset"]
+                    . $val . $cc["reset"] . $cc["nl"]);
+            }
+        }
+    }
+
+    private function printThrowable(Throwable $t, string $indent, array $cc): void {
+        print_r($cc["t_excl"] . $indent
+            . " " . $this->exclamation
             . " " . get_class($t)
-            . " [code: " . $t->getCode() . "]"
-            . self::C_RESET . "\n");
-        print_r($indent . " Thrown by: file://" . $t->getFile() . ":" . $t->getLine() . "\n");
-        print_r($indent . " Message: " . $t->getMessage() . "\n");
-        print_r($indent . " Stacktrace:\n");
+            . " [code: " . $t->getCode() . "] "
+            . $cc["reset"] . $cc["nl"]);
+        print_r($indent . $cc["t_by"] . " Thrown by:  " . $cc["reset"]
+            . " file://" . $t->getFile() . ":" . $t->getLine()
+            . $cc["nl"]);
+        print_r($indent . $cc["t_msg"] . " Message:    " . $cc["reset"]
+            . " " . $t->getMessage() . $cc["nl"]);
+        print_r($indent . $cc["t_stack"] . " Stacktrace: " . $cc["reset"]
+            . $cc["nl"]);
         foreach ($t->getTrace() as $trace) {
             if (preg_match($this->stack_match, $trace["file"])) {
-                print_r($indent . "   >   file://"
+                print_r($indent . "  >  file://"
                     . $trace["file"] . ":"
                     . $trace["line"]
-                    . " -> " . $trace["function"]
-                    . "\n");
+                    . " -> " . $trace["function"] . "()"
+                    . $cc["nl"]);
             }
         }
         if (!is_null($t->getPrevious())) {
-            print_r($indent . " Caused by:\n");
+            print_r($indent . $cc["t_cause"] . " Caused by:  " . $cc["reset"]
+                . $cc["nl"]);
             $indent = $indent . $indent . $indent;
-            $this->printThrowable($t->getPrevious(), $indent);
+            $this->printThrowable($t->getPrevious(), $indent, $cc);
         }
     }
 
