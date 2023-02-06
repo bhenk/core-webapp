@@ -1,31 +1,22 @@
 <?php
 
+/**
+ * Provides logger configurations.
+ *
+ */
 use Monolog\Level;
 
 return [
     "stdout" => [
-        // creator or definition
         "definition" => [
             "channel" => "out",
             "handlers" => [
                 "handler01" => [
-                    "class_name" => "Monolog\Handler\StreamHandler",
+                    "class_name" => "bhenk\corewa\logging\handle\ConsoleHandler",
                     "paras" => [
-                        "stream" => "php://stdout",
                         "level" => Level::Debug,
-                        "bubble" => true,
-                        "filePermission" => null,
-                        "useLocking" => false,
-                    ],
-                    "formatter" => [
-                        "class_name" => "Monolog\Formatter\LineFormatter",
-                        "paras" => [
-                            "format" => "%level_name% | %datetime% > %message% | %context% %extra%\n",
-                            "dateFormat" => "H:i:s:u",
-                            "allowInlineLineBreaks" => true,
-                            "ignoreEmptyContextAndExtra" => false,
-                            "includeStacktraces" => true
-                        ],
+                        "bubble" => false,
+                        "stack_match" => "/application\/(bhenk|unit)/i",
                     ],
                 ],
             ],

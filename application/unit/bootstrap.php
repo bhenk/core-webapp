@@ -17,10 +17,13 @@ use function defined;
 defined("APPLICATION_ROOT")
 or define("APPLICATION_ROOT", realpath(dirname(__DIR__)));
 
-$vendor_autoload = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . "vendor" . DIRECTORY_SEPARATOR . "autoload.php";
+$vendor_autoload = dirname(__DIR__, 2)
+    . DIRECTORY_SEPARATOR . "vendor"
+    . DIRECTORY_SEPARATOR . "autoload.php";
 
 spl_autoload_register(function ($para) {
-    $path = APPLICATION_ROOT . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $para) . '.php';
+    $path = APPLICATION_ROOT . DIRECTORY_SEPARATOR
+        . str_replace('\\', DIRECTORY_SEPARATOR, $para) . '.php';
     if (file_exists($path)) {
         include $path;
         return true;

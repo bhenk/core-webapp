@@ -33,7 +33,7 @@ class ConsoleHandler extends AbstractHandler {
      * or {@link Log::setType()} on how to temporarily change the log output of the entire application.
      *
      * The {@link $stack_match} parameter expects a regular expression. It can be used to suppress the amount of
-     * stacktrace elements of {@link Throwable}s. Par example:
+     * stacktrace elements of {@link Throwable}s. Par example, the regex
      * <code>"/application\/(bhenk|unit)/i"</code> will only print traces of files that have either
      * <code>/application/bhenk</code> or <code>/application/unit</code> in their filename.
      * Defaults to <code>"/(.*?)/i"</code> - all files.
@@ -83,16 +83,17 @@ class ConsoleHandler extends AbstractHandler {
         $message = $record->message;
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
         $arr_file = $backtrace[3];
-        $a_caller = $backtrace[4];
-        $class = $a_caller["class"];
-        $class = substr($class, strrpos($class, "\\") + 1);
-        $type = $a_caller["type"];
-        $function = $a_caller["function"];
+        $a_caller = $backtrace[4] ?? null;
+        $class = $a_caller["class"] ?? null;
+        if (!is_null($class)) $class = substr($class, strrpos($class, "\\") + 1);
+        $type = $a_caller["type"] ?? null;
+        $function = $a_caller["function"] ?? null;
+        $braces = (is_null($function)) ? null : "()";
         $line = $arr_file["line"];
 
         $row = "$level_color $level " . $cc["reset"]
             . $cc["date"] . " $date " . $cc["reset"]
-            . $cc['class'] . " [$class$type$function() $line] " . $cc["reset"]
+            . $cc['class'] . " [$class$type$function$braces $line] " . $cc["reset"]
             . "> " . $message . $cc["reset"]
             . $cc["nl"];
         $click = $cc["file"] . "file://" . $arr_file["file"] . ":$line" . $cc["reset"] . $cc["nl"];
@@ -130,7 +131,7 @@ class ConsoleHandler extends AbstractHandler {
             . $cc["reset"] . $cc["nl"]);
         print_r($indent . $cc["t_by"] . " Thrown by:  " . $cc["reset"]
             . " file://" . $t->getFile() . ":" . $t->getLine()
-            . $cc["nl"]);
+            . $cc["reset"] . $cc["nl"]);
         print_r($indent . $cc["t_msg"] . " Message:    " . $cc["reset"]
             . " " . $t->getMessage() . $cc["nl"]);
         print_r($indent . $cc["t_stack"] . " Stacktrace: " . $cc["reset"]
