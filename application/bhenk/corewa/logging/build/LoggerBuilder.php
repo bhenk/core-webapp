@@ -11,7 +11,6 @@ use Monolog\Logger;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use function array_keys;
-use function array_values;
 use function count;
 use function get_class;
 use function is_null;
@@ -206,16 +205,6 @@ class LoggerBuilder {
         $class_name = $creator["class_name"];
         /** @var LoggerCreatorInterface $object */
         $object = Reflect::createObject($class_name);
-        $paras = $creator["paras"] ?? [];
-        $v = array_values($paras);
-        return match (count($paras)) {
-            0 => $object->create(),
-            1 => $object->create($v[0]),
-            2 => $object->create($v[0], $v[1]),
-            3 => $object->create($v[0], $v[1], $v[2]),
-            4 => $object->create($v[0], $v[1], $v[2], $v[3]),
-            5 => $object->create($v[0], $v[1], $v[2], $v[3], $v[4]),
-            default => throw new Exception("Too many parameters in creator '" . $name . "'"),
-        };
+        return $object->create($creator["paras"] ?? []);
     }
 }

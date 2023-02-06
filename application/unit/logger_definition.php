@@ -4,6 +4,7 @@
  * Provides logger configurations.
  *
  */
+
 use Monolog\Level;
 
 return [
@@ -96,6 +97,19 @@ return [
                     ],
                 ],
             ],
+        ],
+    ],
+    "req" => [
+        "creator" => [
+            "class_name" => "bhenk\corewa\logging\build\RequestLoggerCreator",
+            "paras" => [
+                "level" => Level::Info,
+                "filename" => "logs/unit/req.log",
+                "max_files" => 10,
+                "filename_format" => "{filename}-{date}",
+                "filename_date_format" => "Y-m",
+                "format" => "%datetime% %extra%\n"
+            ]
         ],
     ],
 ];

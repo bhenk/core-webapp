@@ -313,11 +313,37 @@ class LoggerBuilderTest extends TestCase {
         assertEmpty($warnings);
         assertTrue(DummyCreator::wasCalled());
         $expected = [
-            false,
-            "reflection",
-            []
+            "foo" => false,
+            "word" => "reflection",
+            "space" => []
         ];
         assertEquals($expected, DummyCreator::getParas());
+        //$logger->notice(get_class($this) . "->" . __FUNCTION__);
+    }
+
+    public function testBuildWithRequestLoggerCreator() {
+        $entry = [
+            "creator" => [
+                "class_name" => "bhenk\corewa\logging\build\RequestLoggerCreator",
+                "paras" => [
+                    "channel" => "test_req",
+                    "level" => Level::Info,
+                    "filename" => "logs/unit/req.log",
+                    "filename_format" => "{filename}-{date}",
+                    "filename_date_format" => "Y-m",
+                    "format" => "%datetime% %extra%\n"
+                ],
+            ],
+        ];
+        $builder = LoggerBuilder::get();
+        $builder->addEntry("req", $entry);
+        //
+        $builder->setQuiet(false);
+        $logger = $builder->build("req");
+        $warnings = $builder->getWarnings();
+
+        assertInstanceOf(LoggerInterface::class, $logger);
+        assertEmpty($warnings);
         //$logger->notice(get_class($this) . "->" . __FUNCTION__);
     }
 

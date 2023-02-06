@@ -6,6 +6,6 @@ use Psr\Log\LoggerInterface;
 
 interface LoggerCreatorInterface {
 
-    function create(...$paras): LoggerInterface;
+    function create(array $paras = []): LoggerInterface;
 
 }

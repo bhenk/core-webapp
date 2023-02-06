@@ -11,10 +11,8 @@ class DummyCreator implements LoggerCreatorInterface {
     private static bool $is_called = false;
     private static array $paras = [];
 
-    function create(...$paras): Logger {
-        foreach ($paras as $para) {
-            self::$paras[] = $para;
-        }
+    function create(array $paras = []): Logger {
+        self::$paras = $paras;
         self::$is_called = true;
         $logger = new Logger("dummy");
         $logger->pushHandler(new StreamHandler('php://stdout', 100));

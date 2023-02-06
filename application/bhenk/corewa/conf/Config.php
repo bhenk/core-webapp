@@ -3,6 +3,7 @@
 namespace bhenk\corewa\conf;
 
 use Exception;
+use InvalidArgumentException;
 use function file_exists;
 use function is_null;
 
@@ -52,7 +53,7 @@ class Config {
      */
     private static function absolute(string $path, ?string $application_root, bool $must_exist = true): string {
         if ($path == "" or $path == "/")
-            throw new Exception("Argument cannot be empty string: \$path : '" . $path . "'");
+            throw new InvalidArgumentException("Argument cannot be empty string: \$path : '" . $path . "'");
         if (!str_starts_with($path, DIRECTORY_SEPARATOR)) {
             $path = $application_root . DIRECTORY_SEPARATOR . $path;
         }
