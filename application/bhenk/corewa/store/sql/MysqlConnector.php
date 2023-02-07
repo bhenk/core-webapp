@@ -50,6 +50,7 @@ class MysqlConnector {
             try {
                 $this->mysqli = new mysqli($hostname, $config["username"],
                     $config["password"], $config["database"], $port);
+
                 Log::info("Created connection to mysql database '" . $config["database"] . "'");
             } catch (Exception $e) {
                 Log::error("Could not create connection to mysql database '"

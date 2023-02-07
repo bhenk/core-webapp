@@ -1,21 +1,27 @@
 <?php
 
-namespace unit\corewa;
+namespace bhenk\corewa\util\testing;
 
 use bhenk\corewa\logging\Log;
-use function get_class;
 
 trait ConsoleLoggerTrait {
 
+
     private string $previous;
 
+    public static function setUpBeforeClass(): void {
+        echo "hello " . static::class . "\n";
+    }
+
     public function setUp(): void {
-        echo "hello " . get_class($this) . "\n";
         $this->previous = Log::setType("stdout");
     }
 
     public function tearDown(): void {
-        //echo "goodbye " . get_class($this) . "\n";
         Log::setType($this->previous);
+    }
+
+    public static function tearDownAfterClass(): void {
+        echo "goodbye " . static::class . "\n";
     }
 }
