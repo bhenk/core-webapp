@@ -136,14 +136,18 @@ class ConsoleHandler extends AbstractHandler {
             . " " . $t->getMessage() . $cc["nl"]);
         print_r($indent . $cc["t_stack"] . " Stacktrace: " . $cc["reset"]
             . $cc["nl"]);
-        foreach ($t->getTrace() as $trace) {
+
+        $previous = null;
+        foreach (array_reverse($t->getTrace()) as $trace) {
+
             if (preg_match($this->stack_match, $trace["file"])) {
                 print_r($indent . "  >  file://"
                     . $trace["file"] . ":"
                     . $trace["line"]
-                    . " -> " . $trace["function"] . "()"
+                    . " => " . $previous . "()"
                     . $cc["nl"]);
             }
+            $previous = $trace["function"];
         }
         if (!is_null($t->getPrevious())) {
             print_r($indent . $cc["t_cause"] . " Caused by:  " . $cc["reset"]

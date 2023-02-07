@@ -19,8 +19,8 @@ class Config {
      */
     private function __construct(string $application_root, string $config_file) {
         $this->application_root = $application_root;
-        $this->config_file = $config_file;
-        $this->config = require self::absolute($config_file, $application_root);
+        $this->config_file = self::absolute($config_file, $application_root);
+        $this->config = require $this->config_file;
     }
 
     /**

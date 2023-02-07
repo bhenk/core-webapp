@@ -3,6 +3,7 @@
 namespace unit;
 
 use bhenk\corewa\conf\Config;
+use bhenk\corewa\logging\Log;
 use function define;
 use function defined;
 

@@ -17,6 +17,7 @@ return [
                     "paras" => [
                         "level" => Level::Debug,
                         "bubble" => false,
+                        "white_line" => true,
                         "stack_match" => "/application\/(bhenk|unit)/i",
                     ],
                 ],
