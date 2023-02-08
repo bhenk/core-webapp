@@ -113,4 +113,20 @@ return [
             ]
         ],
     ],
+    "console_logger" => [
+        "definition" => [
+            "channel" => "clt",
+            "handlers" => [
+                "handler01" => [
+                    "class_name" => "bhenk\corewa\logging\handle\ConsoleHandler",
+                    "paras" => [
+                        "level" => Level::Debug,
+                        "bubble" => false,
+                        "white_line" => true,
+                        "stack_match" => "/application\/(bhenk|unit)/i",
+                    ],
+                ],
+            ],
+        ],
+    ],
 ];

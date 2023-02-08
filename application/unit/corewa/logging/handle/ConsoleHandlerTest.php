@@ -21,7 +21,7 @@ class ConsoleHandlerTest extends TestCase {
 
     public function testHandler() {
         $ch = new ConsoleHandler();
-        if (UNIT_IS_LOUD or $this->loud) $this->practicalTest();
+        if ($this->loud) $this->practicalTest();
         self::assertInstanceOf(AbstractHandler::class, $ch);
     }
 

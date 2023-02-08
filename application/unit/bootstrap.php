@@ -3,7 +3,7 @@
 namespace unit;
 
 use bhenk\corewa\conf\Config;
-use bhenk\corewa\logging\Log;
+use Exception;
 use function define;
 use function defined;
 
@@ -33,18 +33,20 @@ spl_autoload_register(function ($para) {
 });
 require_once $vendor_autoload;
 
-defined("UNIT_IS_LOUD")
-or define("UNIT_IS_LOUD", false);
-
 $config_file = __DIR__ . DIRECTORY_SEPARATOR . "unit_config.php";
-Config::load(APPLICATION_ROOT, $config_file);
-
-date_default_timezone_set('Europe/Amsterdam');
-
-if (UNIT_IS_LOUD) {
+if (1 == 0) {
     echo "\nBootstrapping from '" . __FILE__ . "'";
     echo "\napplication root = '" . APPLICATION_ROOT . "'";
     echo "\nvendor autoload  = '" . $vendor_autoload . "'";
     echo "\nglobal config    = '" . $config_file . "'";
     echo "\n\n";
 }
+
+try {
+    Config::load(APPLICATION_ROOT, $config_file);
+} catch (Exception $e) {
+    exit($e->getMessage());
+}
+
+date_default_timezone_set('Europe/Amsterdam');
+

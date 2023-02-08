@@ -24,7 +24,7 @@ class LogTest extends TestCase {
 
 
     public function testStatic() {
-        if (UNIT_IS_LOUD or $this->loud) {
+        if ($this->loud) {
             Out::debug("debug test succeeded ");
             Out::info("test succeeded " . get_class($this));
             Out::notice("test succeeded " . get_class($this));
