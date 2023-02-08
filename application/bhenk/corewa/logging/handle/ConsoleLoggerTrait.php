@@ -20,11 +20,13 @@ trait ConsoleLoggerTrait {
     public function setUp(): void {
         if (self::is_trait_on())
             $this->previous = Log::setType("console_logger");
+        parent::setUp();
     }
 
     public function tearDown(): void {
         if (self::is_trait_on())
             Log::setType($this->previous);
+        parent::tearDown();
     }
 
     public static function tearDownAfterClass(): void {
