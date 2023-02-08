@@ -2,9 +2,8 @@
 
 namespace unit\corewa\store\sql;
 
-use bhenk\corewa\logging\Log;
+use bhenk\corewa\logging\handle\ConsoleLoggerTrait;
 use bhenk\corewa\store\sql\MysqlConnector;
-use bhenk\corewa\util\testing\ConsoleLoggerTrait;
 use mysqli;
 use PHPUnit\Framework\TestCase;
 use function PHPUnit\Framework\assertInstanceOf;

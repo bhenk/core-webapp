@@ -1,11 +1,10 @@
 <?php
 
-namespace bhenk\corewa\util\testing;
+namespace bhenk\corewa\logging\handle;
 
 use bhenk\corewa\logging\Log;
 
 trait ConsoleLoggerTrait {
-
 
     private string $previous;
 
