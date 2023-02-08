@@ -6,8 +6,8 @@ return [
     ],
     "bhenk\corewa\store\sql\MysqlConnector" => [
         "hostname" => "127.0.0.1",
-        "username" => "ucorewa",
-        "password" => "pcorewa",
-        "database" => "corewa",
+        "username" => "user",
+        "password" => "user",
+        "database" => "test",
     ],
 ];
