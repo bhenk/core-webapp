@@ -16,7 +16,7 @@ use function PHPUnit\Framework\assertSame;
 class MysqlConnectorTest extends AbstractConfigTestCase {
     use ConsoleLoggerTrait;
 
-    protected static bool $console_logger_trait_on = false;
+    protected static bool $console_logger_trait_on = true;
 
     // will only work when testWrongPassword is first... ???
     public function testWrongPassword() {
@@ -45,6 +45,7 @@ class MysqlConnectorTest extends AbstractConfigTestCase {
         assertInstanceOf(mysqli::class, $mysqli02);
         assertNotSame($mysqli01, $mysqli02);
         assertSame($mysql, MysqlConnector::get());
+        MysqlConnector::closeConnection();
     }
 
 }
