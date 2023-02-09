@@ -2,7 +2,10 @@
 
 namespace bhenk\corewa\logging;
 
+use Monolog\Level;
+use Monolog\Logger;
 use Stringable;
+use function method_exists;
 
 class Log {
 
@@ -16,6 +19,17 @@ class Log {
         $previous = self::$type;
         self::$type = $type;
         return $previous;
+    }
+
+    public static function setLevel(int|string|Level $level): void {
+        $logger = LoggerFactory::get()->getLogger(static::getType());
+        if ($logger instanceof Logger) {
+            foreach ($logger->getHandlers() as $handler) {
+                if (method_exists($handler, "setLevel")) {
+                    $handler->setLevel($level);
+                }
+            }
+        }
     }
 
     public static function emergency(Stringable|string $message, array $context = []): void {

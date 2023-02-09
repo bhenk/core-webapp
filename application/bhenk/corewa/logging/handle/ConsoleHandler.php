@@ -29,8 +29,8 @@ class ConsoleHandler extends AbstractHandler {
     /**
      * Displays log output on console.
      *
-     * This handler is especially equipped to be used during development. See {@link LoggerFactory::setLogger()}
-     * or {@link Log::setType()} on how to temporarily change the log output of the entire application.
+     * This handler is especially equipped to be used during development. See {@link ConsoleLoggerTrait} on how to
+     * switch logging to console for a particular TestCase.
      *
      * The {@link $stack_match} parameter expects a regular expression. It can be used to suppress the amount of
      * stacktrace elements of {@link Throwable}s. Par example, the regex
@@ -40,7 +40,7 @@ class ConsoleHandler extends AbstractHandler {
      *
      * The {@link $date_format} defaults to a short <code>"H:i:s:u"</code>.
      *
-     * The {@link $color_scheme} defaults to ConsoleColors.php, a dark theme.
+     * The {@link $color_scheme} defaults to {@link ConsoleColors.php}, a dark theme.
      *
      * See also {@link AbstractHandler}.
      *

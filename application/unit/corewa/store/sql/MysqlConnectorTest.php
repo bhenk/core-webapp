@@ -5,6 +5,7 @@ namespace unit\corewa\store\sql;
 use bhenk\corewa\conf\Config;
 use bhenk\corewa\logging\handle\ConsoleLoggerTrait;
 use bhenk\corewa\store\sql\MysqlConnector;
+use Monolog\Level;
 use mysqli;
 use mysqli_sql_exception;
 use unit\corewa\conf\AbstractConfigTestCase;
@@ -16,7 +17,13 @@ use function PHPUnit\Framework\assertSame;
 class MysqlConnectorTest extends AbstractConfigTestCase {
     use ConsoleLoggerTrait;
 
-    protected static bool $console_logger_trait_on = true;
+    protected static bool $console_logger_trait_on = false;
+    protected static int|string|Level $console_logger_level = Level::Debug;
+
+    public function tearDown(): void {
+        MysqlConnector::closeConnection();
+        parent::tearDown();
+    }
 
     // will only work when testWrongPassword is first... ???
     public function testWrongPassword() {
@@ -28,7 +35,7 @@ class MysqlConnectorTest extends AbstractConfigTestCase {
             Config::get()->getConfigurationFor(MysqlConnector::class)["password"]);
         // but when we call MysqlConnector::get() it is still the correct password
         // if we run this method after a connection was established... ???
-        self::assertTrue(true);
+
         $this->expectException(mysqli_sql_exception::class);
         MysqlConnector::get();
     }

@@ -3,6 +3,7 @@
 namespace bhenk\corewa\logging\handle;
 
 use bhenk\corewa\logging\Log;
+use Monolog\Level;
 use function print_r;
 use function str_pad;
 
@@ -12,6 +13,10 @@ trait ConsoleLoggerTrait {
 
     private static function is_trait_on(): bool {
         return static::$console_logger_trait_on ?? true;
+    }
+
+    private static function getLevel(): int|string|Level {
+        return static::$console_logger_level ?? Level::Debug;
     }
 
     public static function setUpBeforeClass(): void {
@@ -24,6 +29,7 @@ trait ConsoleLoggerTrait {
     public function setUp(): void {
         if (self::is_trait_on()) {
             $this->previous = Log::setType("console_logger");
+            Log::setLevel(self::getLevel());
             print_r(str_pad(parent::getName(), 120, "-"));
         }
         parent::setUp();

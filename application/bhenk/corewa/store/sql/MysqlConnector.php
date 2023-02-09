@@ -28,12 +28,17 @@ class MysqlConnector {
     }
 
     public static function closeConnection(): void {
+        Log::debug("Trying to close connection to mysql database");
         if (!self::$instance == null) {
             if (isset(self::$instance->mysqli)) {
                 self::$instance->mysqli->close();
                 unset(self::$instance->mysqli);
                 Log::info("Closed connection to mysql database");
+            } else {
+                Log::debug("No connection was open or unreachable");
             }
+        } else {
+            Log::debug("No instance of class " . static::class);
         }
     }
 
