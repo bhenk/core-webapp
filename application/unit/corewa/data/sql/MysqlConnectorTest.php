@@ -1,10 +1,10 @@
 <?php
 
-namespace unit\corewa\store\sql;
+namespace unit\corewa\data\sql;
 
 use bhenk\corewa\conf\Config;
 use bhenk\corewa\logging\handle\ConsoleLoggerTrait;
-use bhenk\corewa\store\sql\MysqlConnector;
+use bhenk\corewa\data\sql\MysqlConnector;
 use Monolog\Level;
 use mysqli;
 use mysqli_sql_exception;

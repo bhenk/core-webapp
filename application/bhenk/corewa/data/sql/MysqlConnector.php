@@ -1,6 +1,6 @@
 <?php
 
-namespace bhenk\corewa\store\sql;
+namespace bhenk\corewa\data\sql;
 
 use bhenk\corewa\conf\Config;
 use bhenk\corewa\logging\Log;

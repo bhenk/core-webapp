@@ -1,6 +1,6 @@
 <?php
 
-namespace bhenk\corewa\store\json;
+namespace bhenk\corewa\data\json;
 
 use bhenk\corewa\conf\Config;
 use JsonSerializable;
