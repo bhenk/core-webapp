@@ -58,9 +58,9 @@ class MysqlConnector {
 
                 Log::info("Created connection to mysql database '" . $config["database"] . "'");
             } catch (Exception $e) {
-                Log::error("Could not create connection to mysql database '"
-                    . $config["database"] . "'", [$e]);
-                throw $e;
+                $msg = "Could not create connection to mysql database '"
+                    . $config["database"] . "'";
+                throw new Exception($msg, 100, $e);
             }
         }
         return $this->mysqli;

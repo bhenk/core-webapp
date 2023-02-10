@@ -124,6 +124,9 @@ return [
                         "bubble" => false,
                         "white_line" => true,
                         "stack_match" => "/application\/(bhenk|unit)/i",
+                        "x" => null, // constructor parameters are set by order
+                        "y" => null, //
+                        //"color_scheme" => "\bhenk\corewa\logging\handle\BrightColorScheme"
                     ],
                 ],
             ],

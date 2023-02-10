@@ -2,12 +2,11 @@
 
 namespace bhenk\corewa\logging\handle;
 
-use bhenk\corewa\logging\Log;
-use bhenk\corewa\logging\LoggerFactory;
 use Monolog\Handler\AbstractHandler;
 use Monolog\Level;
 use Monolog\LogRecord;
 use Throwable;
+use function constant;
 use function debug_backtrace;
 use function get_class;
 use function is_null;
@@ -15,6 +14,7 @@ use function preg_match;
 use function print_r;
 use function str_pad;
 use function strrpos;
+use function strtoupper;
 use function substr;
 
 
@@ -40,7 +40,7 @@ class ConsoleHandler extends AbstractHandler {
      *
      * The {@link $date_format} defaults to a short <code>"H:i:s:u"</code>.
      *
-     * The {@link $color_scheme} defaults to {@link ConsoleColors.php}, a dark theme.
+     * The {@link $color_scheme} defaults to {@link ConsoleHandlerColors}::class, a dark theme.
      *
      * See also {@link AbstractHandler}.
      *
@@ -64,8 +64,11 @@ class ConsoleHandler extends AbstractHandler {
         if (is_null($this->date_format)) $this->date_format = "H:i:s:u";
         if (is_null($this->stack_match)) $this->stack_match = "/(.*?)/i";
         if (is_null($this->exclamation)) $this->exclamation = "chips!";
-        if (is_null($this->color_scheme)) $this->color_scheme = __DIR__ . DIRECTORY_SEPARATOR . "ConsoleColors.php";
-        $this->console_colors = require $this->color_scheme;
+        if (is_null($this->color_scheme)) $this->color_scheme = ConsoleHandlerColors::class;
+    }
+
+    public function getConsoleColorScheme(): string {
+        return $this->color_scheme;
     }
 
     /**
@@ -73,12 +76,12 @@ class ConsoleHandler extends AbstractHandler {
      */
     public function handle(LogRecord $record): bool {
         if (!$this->isHandling($record)) return $this->getBubble();
+        $c = $this->color_scheme;
 
         $this->count += 1;
-        $cc = $this->console_colors;
-        $level = $record->level->toPsrLogLevel();
-        $level_color = $cc[$level];
-        $level = str_pad(strtoupper($level), 9);
+        $level = strtoupper($record->level->toPsrLogLevel());
+        $level_color = constant("$c::" . $level);
+        $level = str_pad($level, 9);
         $date = $record->datetime->format($this->date_format);
         $message = $record->message;
         $backtrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
@@ -91,51 +94,53 @@ class ConsoleHandler extends AbstractHandler {
         $braces = (is_null($function)) ? null : "()";
         $line = $arr_file["line"];
 
-        $row = "$level_color $level " . $cc["reset"]
-            . $cc["date"] . " $date " . $cc["reset"]
-            . $cc['class'] . " [$class$type$function$braces $line] " . $cc["reset"]
-            . "> " . $message . $cc["reset"]
-            . $cc["nl"];
-        $click = $cc["file"] . "file://" . $arr_file["file"] . ":$line" . $cc["reset"] . $cc["nl"];
+        $row = "$level_color $level " . $c::RESET
+            . $c::C_DATE . " $date " . $c::RESET
+            . $c::C_CLASS . " [$class$type$function$braces $line] " . $c::RESET
+            . "> " . $message . $c::RESET
+            . $c::NL;
+        $click = $c::C_FILE . "file://" . $arr_file["file"] . ":$line" . $c::RESET . $c::NL;
 
-        print_r($cc["reset"]);
-        if ($this->white_line) print_r($cc["nl"]);
+        print_r($c::RESET);
+        if ($this->white_line) print_r($c::NL);
         print_r("$this->count ");
         print_r($row);
         print_r($click);
 
-        $this->printArray($record->context, "context", $cc);
-        $this->printArray($record->extra, "extra", $cc);
+        $this->printArray($record->context, "context", $c);
+        $this->printArray($record->extra, "extra", $c);
 
-        print_r("\033[0m");
+        print_r($c::END);
         return $this->getBubble();
     }
 
-    private function printArray(array $arr, string $word, array $cc): void {
+    private function printArray(array $arr, string $word, string $c): void {
         foreach ($arr as $key => $val) {
             $indent = "  ";
             if ($val instanceof Throwable) {
-                self::printThrowable($val, $indent, $cc);
+                self::printThrowable($val, $indent, $c);
             } else {
-                print_r($indent . $cc[$word] . " $word: $key => " . $cc["reset"]
-                    . $val . $cc["reset"] . $cc["nl"]);
+                print_r($indent . constant("$c::" . strtoupper($word))
+                    . " $word: $key => " . $c::RESET
+                    . PHP_EOL
+                    . $val . $c::RESET . $c::NL);
             }
         }
     }
 
-    private function printThrowable(Throwable $t, string $indent, array $cc): void {
-        print_r($cc["t_excl"] . $indent
+    private function printThrowable(Throwable $t, string $indent, string $c): void {
+        print_r($c::T_EXCL . $indent
             . " " . $this->exclamation
             . " " . get_class($t)
             . " [code: " . $t->getCode() . "] "
-            . $cc["reset"] . $cc["nl"]);
-        print_r($indent . $cc["t_by"] . " Thrown by:  " . $cc["reset"]
+            . $c::RESET . $c::NL);
+        print_r($indent . $c::T_BY . " Thrown by:  " . $c::RESET
             . " file://" . $t->getFile() . ":" . $t->getLine()
-            . $cc["reset"] . $cc["nl"]);
-        print_r($indent . $cc["t_msg"] . " Message:    " . $cc["reset"]
-            . " " . $t->getMessage() . $cc["nl"]);
-        print_r($indent . $cc["t_stack"] . " Stacktrace: " . $cc["reset"]
-            . $cc["nl"]);
+            . $c::RESET . $c::NL);
+        print_r($indent . $c::T_MSG . " Message:    " . $c::RESET
+            . " " . $t->getMessage() . $c::NL);
+        print_r($indent . $c::T_STACK . " Stacktrace: " . $c::RESET
+            . $c::NL);
 
         $previous = null;
         foreach (array_reverse($t->getTrace()) as $trace) {
@@ -145,15 +150,15 @@ class ConsoleHandler extends AbstractHandler {
                     . $trace["file"] . ":"
                     . $trace["line"]
                     . " => " . $previous . "()"
-                    . $cc["nl"]);
+                    . $c::NL);
             }
             $previous = $trace["function"];
         }
         if (!is_null($t->getPrevious())) {
-            print_r($indent . $cc["t_cause"] . " Caused by:  " . $cc["reset"]
-                . $cc["nl"]);
+            print_r($indent . $c::T_CAUSE . " Caused by:  " . $c::RESET
+                . $c::NL);
             $indent = $indent . $indent . $indent;
-            $this->printThrowable($t->getPrevious(), $indent, $cc);
+            $this->printThrowable($t->getPrevious(), $indent, $c);
         }
     }
 
