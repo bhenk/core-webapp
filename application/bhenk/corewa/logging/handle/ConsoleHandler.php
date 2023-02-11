@@ -23,7 +23,7 @@ use function substr;
  */
 class ConsoleHandler extends AbstractHandler {
 
-    private array $console_colors;
+    private ColorSchemeInterface $scheme;
     private int $count = 0;
 
     /**
@@ -40,6 +40,8 @@ class ConsoleHandler extends AbstractHandler {
      *
      * The {@link $date_format} defaults to a short <code>"H:i:s:u"</code>.
      *
+     * The {@link $color_scheme} points to the (fully qualified) classname of a class implementing the
+     * {@link ColorSchemeInterface} and defaults to {@link ColorSchemeDark} class, a dark scheme.
      *
      * See also {@link AbstractHandler}.
      *
@@ -64,10 +66,11 @@ class ConsoleHandler extends AbstractHandler {
         if (is_null($this->stack_match)) $this->stack_match = "/(.*?)/i";
         if (is_null($this->exclamation)) $this->exclamation = "chips!";
         if (is_null($this->color_scheme)) $this->color_scheme = ColorSchemeDark::class;
+        $this->scheme = new $this->color_scheme;
     }
 
-    public function getConsoleColorScheme(): string {
-        return $this->color_scheme;
+    public function getColorScheme(): ColorSchemeInterface {
+        return $this->scheme;
     }
 
     /**

@@ -28,7 +28,7 @@ interface ColorSchemeInterface {
     const    TRAIT_HELLO = "";
     const    TRAIT_METHOD = "";
     const    TRAIT_GOODBYE = "";
-    const    TEST = "I'm a test";
+    const    TEST = "I'm a ColorSchemeInterface";
 
 
 }

@@ -2,11 +2,10 @@
 
 namespace bhenk\corewa\logging\handle;
 
-class ColorSchemeBright implements ColorSchemeDark {
+class ColorSchemeBright implements ColorSchemeInterface {
 
     const    NL = "\n ";
     const    RESET = "\033[0m\033[48;5;231m\033[38;5;235m";
-    const    END = "\033[0m";
     const    DEBUG = "\033[38;5;100m";
     const    INFO = "\033[38;5;107m";
     const    NOTICE = "\033[38;5;111m";
@@ -28,6 +27,6 @@ class ColorSchemeBright implements ColorSchemeDark {
     const    TRAIT_HELLO = "";
     const    TRAIT_METHOD = "\033[38;5;40m";
     const    TRAIT_GOODBYE = "\033[38;5;110m";
-    const    TEST = "I am " . self::class;
+    const    TEST = "I am a " . self::class;
 
 }
