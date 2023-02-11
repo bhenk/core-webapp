@@ -12,7 +12,7 @@ use function str_pad;
 trait ConsoleLoggerTrait {
 
     private static string $CONSOLE_LOGGER = "console_logger";
-    private static string $c = ConsoleHandlerColors::class;
+    private static string $c = ColorSchemeDark::class;
     private static ReflectionClass $reflectionClass;
     private static bool $class_on = true;
     private static Level $class_level = Level::Debug;
@@ -65,7 +65,6 @@ trait ConsoleLoggerTrait {
             if ($this->method_on) {
                 $this->previous_type = Log::setType("" . self::$CONSOLE_LOGGER . "");
                 Log::setLevel($this->method_level);
-                //$c = new ConsoleHandlerColors();
                 print_r(self::$c::RESET
                     . self::$c::TRAIT_METHOD
                     . str_pad(parent::getName(), 120, "-")

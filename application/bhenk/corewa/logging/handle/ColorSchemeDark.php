@@ -7,7 +7,7 @@ namespace bhenk\corewa\logging\handle;
  *
  * Implementations of this interface may override color constants;
  */
-interface ConsoleHandlerColors {
+interface ColorSchemeDark {
 
     const    NL = "\n ";
     const    RESET = "\033[0m\033[48;5;236m\033[38;5;252m";

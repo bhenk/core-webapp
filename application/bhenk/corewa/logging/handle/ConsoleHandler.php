@@ -40,7 +40,6 @@ class ConsoleHandler extends AbstractHandler {
      *
      * The {@link $date_format} defaults to a short <code>"H:i:s:u"</code>.
      *
-     * The {@link $color_scheme} defaults to {@link ConsoleHandlerColors}::class, a dark theme.
      *
      * See also {@link AbstractHandler}.
      *
@@ -64,7 +63,7 @@ class ConsoleHandler extends AbstractHandler {
         if (is_null($this->date_format)) $this->date_format = "H:i:s:u";
         if (is_null($this->stack_match)) $this->stack_match = "/(.*?)/i";
         if (is_null($this->exclamation)) $this->exclamation = "chips!";
-        if (is_null($this->color_scheme)) $this->color_scheme = ConsoleHandlerColors::class;
+        if (is_null($this->color_scheme)) $this->color_scheme = ColorSchemeDark::class;
     }
 
     public function getConsoleColorScheme(): string {

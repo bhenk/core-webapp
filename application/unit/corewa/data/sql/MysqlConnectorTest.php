@@ -2,15 +2,11 @@
 
 namespace unit\corewa\data\sql;
 
-use bhenk\corewa\conf\Config;
-use bhenk\corewa\logging\handle\ConsoleLoggerTrait;
 use bhenk\corewa\data\sql\MysqlConnector;
+use bhenk\corewa\logging\handle\ConsoleLoggerTrait;
 use bhenk\corewa\logging\handle\LogAttribute;
-use bhenk\corewa\logging\Log;
-use Exception;
 use Monolog\Level;
 use mysqli;
-use mysqli_sql_exception;
 use unit\corewa\conf\AbstractConfigTestCase;
 use function PHPUnit\Framework\assertInstanceOf;
 use function PHPUnit\Framework\assertNotSame;
@@ -32,7 +28,7 @@ class MysqlConnectorTest extends AbstractConfigTestCase {
     //
     // following 2 methods pass when run separate.
 //    public function testWrongPassword() {
-//        $this->markTestSkipped("strange behaviour");
+//        //$this->markTestSkipped("strange behaviour");
 //        $config = Config::get()->getConfigurationFor(MysqlConnector::class);
 //        $config["password"] = "wrong pass";
 //        Config::get()->setConfigurationFor(MysqlConnector::class, $config);
@@ -45,9 +41,9 @@ class MysqlConnectorTest extends AbstractConfigTestCase {
 //        $this->expectException(Exception::class);
 //        MysqlConnector::get();
 //    }
-
+//
 //    public function testWrongPassword2() {
-//        $this->markTestSkipped("strange behaviour");
+//        //$this->markTestSkipped("strange behaviour");
 //        $config = Config::get()->getConfigurationFor(MysqlConnector::class);
 //        $config["password"] = "wrong pass";
 //        Config::get()->setConfigurationFor(MysqlConnector::class, $config);
@@ -67,7 +63,7 @@ class MysqlConnectorTest extends AbstractConfigTestCase {
 //        self::assertTrue($exception_thrown);
 //    }
 
-    #[LogAttribute(true, Level::Error)]
+    #[LogAttribute(true)]
     public function testConnection() {
         $mysql = MysqlConnector::get();
         assertInstanceOf(MysqlConnector::class, $mysql);
