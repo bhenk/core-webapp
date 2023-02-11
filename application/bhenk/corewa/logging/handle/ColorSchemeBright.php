@@ -2,6 +2,9 @@
 
 namespace bhenk\corewa\logging\handle;
 
+/**
+ * Bright schema for {@link ConsoleHandler}.
+ */
 class ColorSchemeBright implements ColorSchemeInterface {
 
     const    NL = "\n ";

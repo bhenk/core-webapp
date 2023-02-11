@@ -109,7 +109,7 @@ return [
                 "max_files" => 10,
                 "filename_format" => "{filename}-{date}",
                 "filename_date_format" => "Y-m",
-                "format" => "%datetime% %extra%\n"
+                "line_format" => "%datetime% %extra%\n"
             ]
         ],
     ],

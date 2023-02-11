@@ -5,7 +5,6 @@ namespace bhenk\corewa\logging\handle;
 /**
  * Dark schema for {@link ConsoleHandler}.
  *
- * Implementations of this interface may override color constants;
  */
 class ColorSchemeDark implements ColorSchemeInterface {
 

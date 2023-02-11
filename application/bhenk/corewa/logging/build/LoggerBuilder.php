@@ -7,7 +7,6 @@ use bhenk\corewa\util\Reflect;
 use Exception;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\FormattableHandlerInterface;
-use Monolog\Handler\Handler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;

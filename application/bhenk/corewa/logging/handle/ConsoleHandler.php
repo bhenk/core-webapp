@@ -27,8 +27,9 @@ class ConsoleHandler extends AbstractHandler {
     private int $count = 0;
 
     /**
-     * Displays log output on console.
+     * Outputs log statements to console.
      *
+     * <br/>
      * This handler is especially equipped to be used during development. See {@link ConsoleLoggerTrait} on how to
      * switch logging to console for a particular TestCase.
      *
@@ -36,12 +37,12 @@ class ConsoleHandler extends AbstractHandler {
      * stacktrace elements of {@link Throwable}s. Par example, the regex
      * <code>"/application\/(bhenk|unit)/i"</code> will only print traces of files that have either
      * <code>/application/bhenk</code> or <code>/application/unit</code> in their filename.
-     * Defaults to <code>"/(.*?)/i"</code> - all files.
+     * Defaults to <code>>"/(.*?)/i"</code> - all files.
      *
-     * The {@link $date_format} defaults to a short <code>"H:i:s:u"</code>.
+     * The {@link $date_format} defaults to a short *"H:i:s:u"*.
      *
      * The {@link $color_scheme} points to the (fully qualified) classname of a class implementing the
-     * {@link ColorSchemeInterface} and defaults to {@link ColorSchemeDark} class, a dark scheme.
+     * {@link ColorSchemeInterface} and defaults to {@link ColorSchemeDark}, a dark scheme.
      *
      * See also {@link AbstractHandler}.
      *
@@ -69,6 +70,11 @@ class ConsoleHandler extends AbstractHandler {
         $this->scheme = new $this->color_scheme;
     }
 
+    /**
+     * Get the color scheme used by this class.
+     *
+     * @return ColorSchemeInterface
+     */
     public function getColorScheme(): ColorSchemeInterface {
         return $this->scheme;
     }

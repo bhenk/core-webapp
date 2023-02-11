@@ -2,6 +2,11 @@
 
 namespace bhenk\corewa\logging\handle;
 
+/**
+ * Provides color schema for {@link ConsoleHandler}.
+ *
+ * Implementations of this interface may override color constants.
+ */
 interface ColorSchemeInterface {
 
     const    NL = "";
