@@ -5,9 +5,13 @@ namespace bhenk\corewa\logging\build;
 use bhenk\corewa\conf\Config;
 use bhenk\corewa\util\Reflect;
 use Exception;
+use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\FormattableHandlerInterface;
+use Monolog\Handler\Handler;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Monolog\Processor\ProcessorInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 use function array_keys;
@@ -18,96 +22,93 @@ use function is_null;
 /**
  * Singleton class responsible for building loggers that implement {@link LoggerInterface}.
  *
- * LoggerBuilder will get a list of *definitions* and *creators* of loggers from
- * the {@link LoggerBuilder::LOGGER_DEFINITION_FILE} as pointed to in the configuration of this class by
- * {@link Config::getConfigurationFor()}. Loggers will only be build after a request to
- * {@link LoggerBuilder::build()}.
+ * <br/>
+ * ###Configuration entry
+ * This class expects a *configuration entry* in the general configuration file like this:
+ * ```
+ *"bhenk\corewa\logging\build\LoggerBuilder" => [
+ *    "logger_definition_file" => "conf/logger_definition.php",
+ *],
+ * ```
+ * whereby the key *logger_definition_file* points to the file path of the logger definitions.
+ *
+ * @see LoggerBuilder::LOGGER_DEFINITION_FILE
+ * @see Config
  *
  */
 class LoggerBuilder {
 
     /**
-     * Key pointing to the absolute or relative (relative to application root) path of the file that contains
-     * logger definitions and/or creators.
-     * <br/><br/>
-     * ##Configuration file
-     * The configuration file is read by the singleton {@link Config}. For this {@link LoggerBuilder} the
-     * configuration entry should look something like
-     * ```
-     *"bhenk\corewa\logging\build\LoggerBuilder" => [
-     *    "logger_definition_file" => "conf/logger_definition.php",
-     *],
-     * ```
-     * <br/><br/>
-     * ##Logger definition file
+     * Key in the *configuration entry* of this class pointing to the absolute or relative path of the file
+     * that contains logger definitions and/or creators, aka *logger definition file*.
      *
-     * The logger definition file should give an array of logger types and is used by this class by means of
-     * a *require* statement.
-     * <br/><br/>
+     * <br/>
+     * ###Logger definition file
+     *
+     * The *logger definition file* contains an array of entries (type names) that point either to a *definition* or
+     * the *creator* of a logger. The arrangement of a *logger definition file* goes like this:
+     *
+     * ```
+     * return [
+     *      "{type_name}" => ["definition" => [ {logger definition} ] ]
+     *      ...
+     *      "{type_name}" => ["creator" => [ {logger creator} ] ]
+     *      ...
+     * ];
+     * ```
+     * Order is not critical - entries with *definition*s and entries with *creator*s may be intermingled.
+     *
+     * <br/>
      * ###Logger definition
      *
-     * Example of an entry in the logger definition file of a logger definition:
+     * Example of an entry in the *logger definition file* of a logger *definition*:
      * ```
-     *"stderr" => [
+     *"{entry 01}" => [
      *    "definition" => [
-     *        "channel" => "err",
+     *        "channel" => "{channel name}", // optional
      *        "handlers" => [
-     *            "handler01" => [
-     *                "class_name" => "Monolog\Handler\StreamHandler",
-     *                "paras" => [
-     *                    "stream" => "php://stderr",
-     *                    "level" => Level::Error,
-     *                    "bubble" => true,
-     *                    "filePermission" => null,
-     *                    "useLocking" => false,
+     *            "{handler01}" => [
+     *                "class_name" => "{namespace\Handler}",
+     *                "paras" => [  // optional
+     *                    {name} => {value of constructor parameter}
+     *                    ...
      *                ],
-     *                "formatter" => [
-     *                    "class_name" => "Monolog\Formatter\LineFormatter",
-     *                    "paras" => [
-     *                        "format" => "%level_name% | %datetime% > %message% | %context% %extra%\n",
-     *                        "dateFormat" => "H:i:s:u",
-     *                        "allowInlineLineBreaks" => true,
-     *                        "ignoreEmptyContextAndExtra" => false,
-     *                        "includeStacktraces" => true
-     *                    ],
+     *                "formatter" => [  // optional, Formatter for the above Handler
+     *                    "class_name" => "{namespace\Formatter}",
+     *                    "paras" => [ ]  // optional
      *                ],
      *            ],
+     *            ...  // optional, more Handler definitions
      *        ],
-     *        "processors" => [
-     *            "processor01" => [
-     *                "class_name" => "Monolog\Processor\IntrospectionProcessor",
-     *                "paras" => [
-     *                    "level" => Level::Debug,
-     *                    "skipClassesPartials" => [],
-     *                    "skipStackFramesCount" => 1,
-     *                ],
+     *        "processors" => [  // optional
+     *            "{processor01}" => [
+     *                "class_name" => "{namespace\Processor}",
+     *                "paras" => [ ]  // optional
      *            ],
+     *            ...  // optional, more Processor definitions
      *        ],
      *    ],
      *],
      * ```
-     * <br/><br/>
+     * In the above *{namespace\Classname}* is a placeholder for the fully qualified classname of a class
+     * that implements the Monolog {@link HandlerInterface}, {@link FormatterInterface} or
+     * {@link ProcessorInterface} respectively.
+     *
+     * <br/>
      * ###Logger creator
      *
-     * Example of an entry in the logger definition file of a logger creator:
-     *
+     * Example of an entry in the *logger definition file* of a logger *creator*:
      * ```
-     *"req" => [
+     *"{entry02}" => [
      *    "creator" => [
-     *        "class_name" => "bhenk\corewa\logging\build\RequestLoggerCreator",
-     *        "paras" => [
-     *            "level" => Level::Info,
-     *            "filename" => "logs/req/req.log",
-     *            "max_files" => 10,
-     *            "filename_format" => "{filename}-{date}",
-     *            "filename_date_format" => "Y-m",
-     *            "format" => "%datetime% %extra%\n"
-     *        ]
+     *        "class_name" => "{namespace\LoggerCreator}",
+     *        "paras" => [ ]  // optional
      *    ],
      *],
-     *```
+     * ```
+     * In the above *{namespace\LoggerCreator}* is a placeholder for the fully qualified classname of a class
+     * that implements the {@link LoggerCreatorInterface}.
      *
-     * @see Config
      */
     public const LOGGER_DEFINITION_FILE = "logger_definition_file";
     private static ?LoggerBuilder $instance = null;
@@ -174,10 +175,10 @@ class LoggerBuilder {
      * Definition or creator should adhere to standards as found in the file pointed to by
      * {@link LoggerBuilder::LOGGER_DEFINITION_FILE}.
      *
-     * As a side effect this method may try to load the definition file.
+     * As a side effect, this method may try to load the *logger definition file*.
      *
      * @param string $type name under which the logger defined or created will reside.
-     * @param array $entry an array with a definition or creator
+     * @param array $entry an array with a *definition* or *creator*
      * @return void
      * @throws Exception
      */
@@ -202,8 +203,8 @@ class LoggerBuilder {
     /**
      * Tries to build or create a certain type of logger.
      *
-     * This method will look for a definition or creator of the given type as given by an entry in the logger
-     * definition file pointed to by {@link LoggerBuilder::LOGGER_DEFINITION_FILE} or added by the method
+     * This method will look for a definition or creator of the given type as given by an entry in the *logger
+     * definition file* pointed to by {@link LoggerBuilder::LOGGER_DEFINITION_FILE} or added by the method
      * {@link LoggerBuilder::addEntry()}.
      *
      * If not yet loaded this method will trigger an attempt to load the logger definition file.
@@ -258,23 +259,23 @@ class LoggerBuilder {
     /**
      * @throws Exception
      */
-    private function getEntry(string $name): array {
-        if (!isset($this->entries[$name]))
-            throw new Exception("Entry '" . $name . "' not found.");
-        return $this->entries[$name];
+    private function getEntry(string $type): array {
+        if (!isset($this->entries[$type]))
+            throw new Exception("Entry '" . $type . "' not found.");
+        return $this->entries[$type];
     }
 
     /**
      * @throws Exception
      */
-    private function createLogger(string $name, array $entry): LoggerInterface {
+    private function createLogger(string $type, array $entry): LoggerInterface {
         if (empty($entry)) {
             throw new Exception("Could not create logger. Empty entry");
         }
         $key = array_keys($entry)[0];
         return match ($key) {
-            "definition" => $this->createLoggerFromDefinition($name, $entry["definition"]),
-            "creator" => $this->getLoggerFromCreator($name, $entry["creator"]),
+            "definition" => $this->createLoggerFromDefinition($type, $entry["definition"]),
+            "creator" => $this->getLoggerFromCreator($type, $entry["creator"]),
             default => throw new Exception(
                 "Unknown key: '" . $key . "'. "
                 . "Expected either 'definition' or 'creator'."),
@@ -284,24 +285,24 @@ class LoggerBuilder {
     /**
      * @throws Exception
      */
-    private function createLoggerFromDefinition(string $name, array $definition): LoggerInterface {
-        $channel = $definition["channel"] ?? $name;
+    private function createLoggerFromDefinition(string $type, array $definition): LoggerInterface {
+        $channel = $definition["channel"] ?? $type;
         $logger = new Logger($channel);
         if (!isset($definition["handlers"])) {
-            throw new Exception("No handlers set for logger '" . $name . "'");
+            throw new Exception("No handlers set for logger '" . $type . "'");
         }
-        $this->addHandlers($name, $logger, $definition["handlers"]);
-        if (isset($definition["processors"])) $this->addProcessors($name, $logger, $definition["processors"]);
+        $this->addHandlers($type, $logger, $definition["handlers"]);
+        if (isset($definition["processors"])) $this->addProcessors($type, $logger, $definition["processors"]);
         return $logger;
     }
 
     /**
      * @throws Exception
      */
-    private function addHandlers(string $name, Logger $logger, array $handlers): void {
+    private function addHandlers(string $type, Logger $logger, array $handlers): void {
         foreach ($handlers as $key => $handler) {
             if (!isset($handler["class_name"])) {
-                throw new Exception("No 'class_name' set on handler '" . $key . "' from entry '" . $name . "'");
+                throw new Exception("No 'class_name' set on handler '" . $key . "' from entry '" . $type . "'");
             }
             $class_name = $handler["class_name"];
             $paras = $handler["paras"] ?? [];
@@ -313,7 +314,7 @@ class LoggerBuilder {
 
             $formatter = $handler["formatter"] ?? false;
             if ($object instanceof FormattableHandlerInterface and $formatter) {
-                $this->addFormatter($name, $object, $formatter);
+                $this->addFormatter($type, $object, $formatter);
             }
         }
     }
@@ -321,10 +322,10 @@ class LoggerBuilder {
     /**
      * @throws Exception
      */
-    private function addFormatter(string $name, FormattableHandlerInterface $handler, array $formatter): void {
+    private function addFormatter(string $type, FormattableHandlerInterface $handler, array $formatter): void {
         if (!isset($formatter["class_name"])) {
             throw new Exception(
-                "No 'class_name' set on handler '" . get_class($handler) . "' from entry '" . $name . "'");
+                "No 'class_name' set on handler '" . get_class($handler) . "' from entry '" . $type . "'");
         }
         $class_name = $formatter["class_name"];
         $paras = $formatter["paras"] ?? [];
@@ -335,10 +336,10 @@ class LoggerBuilder {
     /**
      * @throws Exception
      */
-    private function addProcessors(string $name, Logger $logger, array $processors): void {
+    private function addProcessors(string $type, Logger $logger, array $processors): void {
         foreach ($processors as $key => $processor) {
             if (!isset($processor["class_name"])) {
-                throw new Exception("No 'class_name' set on processor '" . $key . "' from entry '" . $name . "'");
+                throw new Exception("No 'class_name' set on processor '" . $key . "' from entry '" . $type . "'");
             }
             $class_name = $processor["class_name"];
             $paras = $processor["paras"] ?? [];
@@ -350,10 +351,10 @@ class LoggerBuilder {
     /**
      * @throws Exception
      */
-    private function getLoggerFromCreator(string $name, array $creator): LoggerInterface {
+    private function getLoggerFromCreator(string $type, array $creator): LoggerInterface {
         if (!isset($creator["class_name"])) {
             throw new Exception(
-                "No 'class_name' set on creator under entry '" . $name . "'");
+                "No 'class_name' set on creator under entry '" . $type . "'");
         }
         $class_name = $creator["class_name"];
         /** @var LoggerCreatorInterface $object */
