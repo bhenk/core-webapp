@@ -3,8 +3,8 @@
 namespace unit\corewa\data\sql;
 
 use bhenk\corewa\data\sql\MysqlConnector;
-use bhenk\corewa\logging\handle\ConsoleLoggerTrait;
-use bhenk\corewa\logging\handle\LogAttribute;
+use bhenk\corewa\logging\ConsoleLoggerTrait;
+use bhenk\corewa\logging\LogAttribute;
 use Monolog\Level;
 use mysqli;
 use unit\corewa\conf\AbstractConfigTestCase;

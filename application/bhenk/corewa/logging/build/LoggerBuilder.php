@@ -15,25 +15,133 @@ use function count;
 use function get_class;
 use function is_null;
 
+/**
+ * Singleton class responsible for building loggers that implement {@link LoggerInterface}.
+ *
+ * LoggerBuilder will get a list of *definitions* and *creators* of loggers from
+ * the {@link LoggerBuilder::LOGGER_DEFINITION_FILE} as pointed to in the configuration of this class by
+ * {@link Config::getConfigurationFor()}. Loggers will only be build after a request to
+ * {@link LoggerBuilder::build()}.
+ *
+ */
 class LoggerBuilder {
 
+    /**
+     * Key pointing to the absolute or relative (relative to application root) path of the file that contains
+     * logger definitions and/or creators.
+     * <br/><br/>
+     * ##Configuration file
+     * The configuration file is read by the singleton {@link Config}. For this {@link LoggerBuilder} the
+     * configuration entry should look something like
+     * ```
+     *"bhenk\corewa\logging\build\LoggerBuilder" => [
+     *    "logger_definition_file" => "conf/logger_definition.php",
+     *],
+     * ```
+     * <br/><br/>
+     * ##Logger definition file
+     *
+     * The logger definition file should give an array of logger types and is used by this class by means of
+     * a *require* statement.
+     * <br/><br/>
+     * ###Logger definition
+     *
+     * Example of an entry in the logger definition file of a logger definition:
+     * ```
+     *"stderr" => [
+     *    "definition" => [
+     *        "channel" => "err",
+     *        "handlers" => [
+     *            "handler01" => [
+     *                "class_name" => "Monolog\Handler\StreamHandler",
+     *                "paras" => [
+     *                    "stream" => "php://stderr",
+     *                    "level" => Level::Error,
+     *                    "bubble" => true,
+     *                    "filePermission" => null,
+     *                    "useLocking" => false,
+     *                ],
+     *                "formatter" => [
+     *                    "class_name" => "Monolog\Formatter\LineFormatter",
+     *                    "paras" => [
+     *                        "format" => "%level_name% | %datetime% > %message% | %context% %extra%\n",
+     *                        "dateFormat" => "H:i:s:u",
+     *                        "allowInlineLineBreaks" => true,
+     *                        "ignoreEmptyContextAndExtra" => false,
+     *                        "includeStacktraces" => true
+     *                    ],
+     *                ],
+     *            ],
+     *        ],
+     *        "processors" => [
+     *            "processor01" => [
+     *                "class_name" => "Monolog\Processor\IntrospectionProcessor",
+     *                "paras" => [
+     *                    "level" => Level::Debug,
+     *                    "skipClassesPartials" => [],
+     *                    "skipStackFramesCount" => 1,
+     *                ],
+     *            ],
+     *        ],
+     *    ],
+     *],
+     * ```
+     * <br/><br/>
+     * ###Logger creator
+     *
+     * Example of an entry in the logger definition file of a logger creator:
+     *
+     * ```
+     *"req" => [
+     *    "creator" => [
+     *        "class_name" => "bhenk\corewa\logging\build\RequestLoggerCreator",
+     *        "paras" => [
+     *            "level" => Level::Info,
+     *            "filename" => "logs/req/req.log",
+     *            "max_files" => 10,
+     *            "filename_format" => "{filename}-{date}",
+     *            "filename_date_format" => "Y-m",
+     *            "format" => "%datetime% %extra%\n"
+     *        ]
+     *    ],
+     *],
+     *```
+     *
+     * @see Config
+     */
+    public const LOGGER_DEFINITION_FILE = "logger_definition_file";
     private static ?LoggerBuilder $instance = null;
     private array $entries = [];
     private array $warnings = [];
     private bool $quiet = false;
 
+    /**
+     * Create a minimal logger with a {@link StreamHandler} set to *php://stderr*.
+     *
+     * @return Logger
+     */
     public static function createDefaultErr(): Logger {
         $logger = new Logger("err");
         $logger->pushHandler(new StreamHandler('php://stderr', 100));
         return $logger;
     }
 
+    /**
+     * Create a minimal logger with a {@link StreamHandler} set to *php://stdout*.
+     *
+     * @return Logger
+     */
     public static function createDefaultOut(): Logger {
         $logger = new Logger("out");
         $logger->pushHandler(new StreamHandler('php://stdout', 100));
         return $logger;
     }
 
+    /**
+     * Get the singleton instance of this class.
+     *
+     * @return LoggerBuilder
+     */
     public static function get(): LoggerBuilder {
         if (is_null(self::$instance)) {
             self::$instance = new LoggerBuilder();
@@ -42,42 +150,87 @@ class LoggerBuilder {
     }
 
     /**
+     * Get a list of warnings issued during the previous call to {@link LoggerBuilder::build()}.
+     *
      * @return array
      */
     public function getWarnings(): array {
         return $this->warnings;
     }
 
+    /**
+     * Do or do not print warnings to *php://stderr* during subsequent builds.
+     *
+     * @param bool $quiet
+     * @return void
+     */
     public function setQuiet(bool $quiet): void {
         $this->quiet = $quiet;
     }
 
     /**
+     * Add an entry to the list of definitions and creators of this LoggerBuilder.
+     *
+     * Definition or creator should adhere to standards as found in the file pointed to by
+     * {@link LoggerBuilder::LOGGER_DEFINITION_FILE}.
+     *
+     * As a side effect this method may try to load the definition file.
+     *
+     * @param string $type name under which the logger defined or created will reside.
+     * @param array $entry an array with a definition or creator
+     * @return void
      * @throws Exception
      */
-    public function addEntry(string $name, array $entry): void {
+    public function addEntry(string $type, array $entry): void {
         $this->maybeLoadDefinitions();
-        $this->entries[$name] = $entry;
+        $this->entries[$type] = $entry;
     }
 
+    /**
+     * Empties the list of entries previously loaded.
+     *
+     * A subsequent call to {@link LoggerBuilder::build()} will
+     * trigger a new attempt to load definitions and creators from the file pointed to by
+     * {@link LoggerBuilder::LOGGER_DEFINITION_FILE}.
+     *
+     * @return void
+     */
     public function reset(): void {
         $this->entries = [];
     }
 
-    public function build(string $name): LoggerInterface {
+    /**
+     * Tries to build or create a certain type of logger.
+     *
+     * This method will look for a definition or creator of the given type as given by an entry in the logger
+     * definition file pointed to by {@link LoggerBuilder::LOGGER_DEFINITION_FILE} or added by the method
+     * {@link LoggerBuilder::addEntry()}.
+     *
+     * If not yet loaded this method will trigger an attempt to load the logger definition file.
+     *
+     * If anything should go wrong during build or creation of the requested logger,
+     * this method guarantees to deliver at least a logger to *php://stdout*. In this case warnings will be printed
+     * to *php://stderr*, unless this builder was requested to be quiet by a call to
+     * {@link LoggerBuilder::setQuiet()}. A list of warnings issued during the build process can be obtained
+     * by a call to {@link LoggerBuilder::getWarnings()}.
+     *
+     * @param string $type
+     * @return LoggerInterface
+     */
+    public function build(string $type): LoggerInterface {
         $this->warnings = [];
         $logger = null;
         try {
             $this->maybeLoadDefinitions();
-            $entry = $this->getEntry($name);
-            $logger = $this->createLogger($name, $entry);
+            $entry = $this->getEntry($type);
+            $logger = $this->createLogger($type, $entry);
         } catch (Throwable $e) {
             $this->warnings[] = $e->getMessage()
                 . " [" . get_class($e) . "]"
                 . " (" . __METHOD__ . ":" . __LINE__ . ")";
         }
         if (count($this->warnings) > 0) {
-            $this->warnings[] = "Unable to create logger with name '" . $name . "'";
+            $this->warnings[] = "Unable to create logger with name '" . $type . "'";
             $logger = self::createDefaultOut();
             $this->warnings[] =
                 "Could not create logger. See above for details. Using fallback logger.";
@@ -97,7 +250,7 @@ class LoggerBuilder {
     private function maybeLoadDefinitions(): void {
         if (empty($this->entries)) {
             $config = Config::get()->getConfigurationFor(get_class($this));
-            $logger_definition_file = $config["logger_definition_file"];
+            $logger_definition_file = $config[self::LOGGER_DEFINITION_FILE];
             $this->entries = require Config::get()->makeAbsolute($logger_definition_file);
         }
     }
