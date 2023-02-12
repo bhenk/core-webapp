@@ -3,4 +3,4 @@ Core webapp functionality
 
 ![core-webapp](docs/img/overview/package-dependencies.svg)
 
-_Fig. 1. Package dependencies
+_Fig. 1. Package dependencies_
