@@ -65,7 +65,7 @@ use function str_pad;
  */
 trait ConsoleLoggerTrait {
 
-    private static string $CONSOLE_LOGGER = "console_logger";
+    const CONSOLE_LOGGER = "console_logger";
     private static ColorSchemeInterface $cs;
     private static ReflectionClass $reflectionClass;
     private static bool $class_on = true;
@@ -83,7 +83,7 @@ trait ConsoleLoggerTrait {
             self::$class_level = $args[1] ?? Level::Debug;
         }
         if (self::$class_on) {
-            $logger = LoggerFactory::get()->getLogger(self::$CONSOLE_LOGGER);
+            $logger = LoggerFactory::get()->getLogger(self::CONSOLE_LOGGER);
             if (method_exists($logger, "getHandlers")) {
                 /** @var ConsoleHandler $handler */
                 $handler = $logger->getHandlers()[0];
@@ -126,7 +126,7 @@ trait ConsoleLoggerTrait {
                 $this->method_level = $args[1] ?? Level::Debug;
             }
             if ($this->method_on) {
-                $this->previous_type = Log::setType(self::$CONSOLE_LOGGER);
+                $this->previous_type = Log::setType(self::CONSOLE_LOGGER);
                 Log::setLevel($this->method_level);
                 print_r(self::$cs::RESET
                     . self::$cs::TRAIT_METHOD

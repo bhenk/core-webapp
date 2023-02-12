@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f3d4a54ed06a8051a5fa704c71fa2a8c",
+    "content-hash": "bcab6d452863dead25930d909895a3f2",
     "packages": [
         {
             "name": "monolog/monolog",
@@ -473,12 +473,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-code-coverage.git",
-                "reference": "c1a1d8666565e8e4efa60211cadcce29909593d3"
+                "reference": "8083be52c6f5ba5a48eafa154e0aeefd96bda098"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/c1a1d8666565e8e4efa60211cadcce29909593d3",
-                "reference": "c1a1d8666565e8e4efa60211cadcce29909593d3",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-code-coverage/zipball/8083be52c6f5ba5a48eafa154e0aeefd96bda098",
+                "reference": "8083be52c6f5ba5a48eafa154e0aeefd96bda098",
                 "shasum": ""
             },
             "require": {
@@ -542,7 +542,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-01-30T06:35:23+00:00"
+            "time": "2023-02-11T08:53:26+00:00"
         },
         {
             "name": "phpunit/php-file-iterator",
@@ -791,12 +791,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "e7b1615e3e887d6c719121c6d4a44b0ab9645555"
+                "reference": "796aeeaa688d8bc7730f0e6d00ccebb380bd21cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/e7b1615e3e887d6c719121c6d4a44b0ab9645555",
-                "reference": "e7b1615e3e887d6c719121c6d4a44b0ab9645555",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/796aeeaa688d8bc7730f0e6d00ccebb380bd21cc",
+                "reference": "796aeeaa688d8bc7730f0e6d00ccebb380bd21cc",
                 "shasum": ""
             },
             "require": {
@@ -869,7 +869,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6.3"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6"
             },
             "funding": [
                 {
@@ -885,7 +885,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-04T13:37:15+00:00"
+            "time": "2023-02-11T08:52:39+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1693,12 +1693,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/resource-operations.git",
-                "reference": "f7adbde0c6a1f761f9a005bda39b7fdbf2d16bad"
+                "reference": "e1157eac767e4dc4ae40dd9aab7fb4de6e56bd32"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/resource-operations/zipball/f7adbde0c6a1f761f9a005bda39b7fdbf2d16bad",
-                "reference": "f7adbde0c6a1f761f9a005bda39b7fdbf2d16bad",
+                "url": "https://api.github.com/repos/sebastianbergmann/resource-operations/zipball/e1157eac767e4dc4ae40dd9aab7fb4de6e56bd32",
+                "reference": "e1157eac767e4dc4ae40dd9aab7fb4de6e56bd32",
                 "shasum": ""
             },
             "require": {
@@ -1740,7 +1740,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-02T11:26:30+00:00"
+            "time": "2023-02-08T06:53:39+00:00"
         },
         {
             "name": "sebastian/type",
@@ -1908,7 +1908,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=8.0",
+        "php": ">=8.2",
         "ext-mysqli": "*"
     },
     "platform-dev": [],
