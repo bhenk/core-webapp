@@ -128,7 +128,7 @@ class ConsoleHandler extends AbstractHandler {
             if ($val instanceof Throwable) {
                 self::printThrowable($val, $indent, $c);
             } else {
-                print_r($indent . constant("$c::" . strtoupper($word))
+                print_r($indent . constant("$c::" . strtoupper("C_" . $word))
                     . " $word: $key => " . $c::RESET
                     . PHP_EOL
                     . $val . $c::RESET . $c::NL);

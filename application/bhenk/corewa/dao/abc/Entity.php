@@ -3,16 +3,17 @@
 namespace bhenk\corewa\dao\abc;
 
 use ReflectionClass;
+use function array_values;
 use function var_dump;
 
-readonly class Entity implements EntityInterface {
+class Entity implements EntityInterface {
 
     public static function fromArray(array $arr) : static {
         $rc = new ReflectionClass(static::class);
-        return $rc->newInstanceArgs($arr);
+        return $rc->newInstanceArgs(array_values($arr));
     }
 
-    function __construct(private ?int $id) {}
+    function __construct(private readonly ?int $id) {}
 
     public function getId(): ?int {
         return $this->id;
@@ -22,7 +23,7 @@ readonly class Entity implements EntityInterface {
         $arr = [];
         $rc = new ReflectionClass($this);
         foreach ($rc->getProperties() as $prop) {
-            $arr[] = $prop->getValue($this);
+            $arr[$prop->getName()] = $prop->getValue($this);
         }
         return $arr;
     }
@@ -32,4 +33,5 @@ readonly class Entity implements EntityInterface {
         $arr[0] = $id;
         return static::fromArray($arr);
     }
+
 }
