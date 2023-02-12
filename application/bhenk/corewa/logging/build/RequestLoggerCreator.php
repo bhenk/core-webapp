@@ -5,7 +5,6 @@ namespace bhenk\corewa\logging\build;
 use bhenk\corewa\conf\Config;
 use DateTimeInterface;
 use Exception;
-use InvalidArgumentException;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\RotatingFileHandler;
 use Monolog\Level;
@@ -50,7 +49,7 @@ class RequestLoggerCreator implements LoggerCreatorInterface {
      */
     function create(array $paras = []): LoggerInterface {
         if (!isset($paras["filename"])) {
-            throw new InvalidArgumentException("Missing parameter 'filename'");
+            throw new Exception("Missing parameter 'filename'");
         }
         $filename = Config::get()->makeAbsolute($paras["filename"], false);
         $handler = new RotatingFileHandler(

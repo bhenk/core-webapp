@@ -202,7 +202,7 @@ class LoggerBuilder {
     /**
      * Tries to build or create a certain type of logger.
      *
-     * This method will look for a definition or creator of the given type as given by an entry in the *logger
+     * This method will look for a definition or creator of the given type as defined by an entry in the *logger
      * definition file* pointed to by {@link LoggerBuilder::LOGGER_DEFINITION_FILE} or added by the method
      * {@link LoggerBuilder::addEntry()}.
      *

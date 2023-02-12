@@ -81,7 +81,7 @@ class Config {
     }
 
     /**
-     * Get the *application root*.
+     * Get the *application root*, parent directory of public_html.
      *
      * @return string
      */
