@@ -3,35 +3,50 @@
 namespace bhenk\corewa\dao\abc;
 
 use ReflectionClass;
+use function array_slice;
 use function array_values;
-use function var_dump;
+use function get_class;
 
 class Entity implements EntityInterface {
 
-    public static function fromArray(array $arr) : static {
+    function __construct(private readonly ?int $ID) {}
+
+    public static function fromArray(array $arr): static {
         $rc = new ReflectionClass(static::class);
         return $rc->newInstanceArgs(array_values($arr));
     }
 
-    function __construct(private readonly ?int $id) {}
-
-    public function getId(): ?int {
-        return $this->id;
+    public function getID(): ?int {
+        return $this->ID;
     }
 
     public function toArray(): array {
         $arr = [];
         $rc = new ReflectionClass($this);
         foreach ($rc->getProperties() as $prop) {
-            $arr[$prop->getName()] = $prop->getValue($this);
+            $val = $prop->getValue($this);
+            if ($prop->getType()->getName() == "bool") {
+                $val = $val ? 1 : 0;
+            }
+            $arr[$prop->getName()] = $val;
         }
         return $arr;
     }
 
-    public function clone(?int $id) : Entity {
+    public function clone(?int $ID): Entity {
         $arr = $this->toArray();
-        $arr[0] = $id;
+        $arr["ID"] = $ID;
         return static::fromArray($arr);
+    }
+
+    public function equals(Entity $other): bool {
+        return get_class($this) === get_class($other) and
+            array_slice($this->toArray(), 1) === array_slice($other->toArray(), 1);
+    }
+
+    public function isSame(Entity $other): bool {
+        return $this->equals($other) and
+            $this->getID() === $other->getID();
     }
 
 }

@@ -4,13 +4,14 @@ namespace bhenk\corewa\dao\node;
 
 use bhenk\corewa\dao\abc\Entity;
 
-class Node extends Entity {
+class NodeDo extends Entity {
 
     function __construct(private readonly ?int $ID = null,
                          private ?int          $parent_id = null,
                          private ?string       $name = null,
                          private ?string       $alias = null,
-                         private ?string       $nature = null
+                         private ?string       $nature = null,
+                         private bool          $public = true
     ) {
         parent::__construct($this->ID);
     }
@@ -69,6 +70,20 @@ class Node extends Entity {
      */
     public function setNature(?string $nature): void {
         $this->nature = $nature;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPublic(): bool {
+        return $this->public;
+    }
+
+    /**
+     * @param bool $public
+     */
+    public function setPublic(bool $public): void {
+        $this->public = $public;
     }
 
 }
