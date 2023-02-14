@@ -14,7 +14,6 @@ use function is_null;
 use function mysqli_report;
 use function rtrim;
 use function str_repeat;
-use function var_dump;
 
 abstract class AbstractDao {
 
@@ -32,10 +31,11 @@ abstract class AbstractDao {
      *      `%int_prop%`        INT,
      *      `%string_prop%`     VARCHAR(255),
      *      `%bool_prop%`       BOOLEAN,
+     *      `%float_prop%`      FLOAT,
      *      PRIMARY KEY (`ID`)
      * );
      * ```
-     * _%xyz%_ is placeholder for table name or property name.
+     * In the above _%xyz%_ is placeholder for table name or property name.
      *
      * Subclasses may override.
      *
@@ -83,6 +83,15 @@ abstract class AbstractDao {
 
     public function update(Entity $entity): bool {
         return $this->updateBatch([$entity]);
+    }
+
+    public function delete(int $ID): int {
+        return $this->deleteBatch([$ID]);
+    }
+
+    public function select(int $ID): ?Entity {
+        $selected = $this->selectBatch([$ID]);
+        return (count($selected) == 1) ? $selected[0] : null;
     }
 
     public function insertBatch(array $entity_array): array {
@@ -150,10 +159,6 @@ abstract class AbstractDao {
         }
     }
 
-    public function delete(int $ID): int {
-        return $this->deleteBatch([$ID]);
-    }
-
     public function deleteBatch(array $ids): int {
         $sql = $this->getPrepareDeleteStatement(count($ids));
         Log::debug($sql);
@@ -174,7 +179,8 @@ abstract class AbstractDao {
     }
 
     public function deleteWhere(string $where_clause): int {
-        $sql = /** @lang text */ "DELETE FROM `" . $this->getTableName() . "` WHERE " . $where_clause;
+        $sql = /** @lang text */
+            "DELETE FROM `" . $this->getTableName() . "` WHERE " . $where_clause;
         Log::debug($sql);
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         try {
@@ -186,11 +192,6 @@ abstract class AbstractDao {
         } catch (Throwable $e) {
             throw new Exception("Could not delete Entity", 203, $e);
         }
-    }
-
-    public function select(int $ID): ?Entity {
-        $selected = $this->selectBatch([$ID]);
-        return (count($selected) == 1) ? $selected[0] : null;
     }
 
     public function selectBatch(array $ids): array {
@@ -221,7 +222,8 @@ abstract class AbstractDao {
     }
 
     public function selectWhere(string $where_clause): array {
-        $sql = /** @lang text */ "SELECT * FROM `" . $this->getTableName() . "` WHERE " . $where_clause;
+        $sql = /** @lang text */
+            "SELECT * FROM `" . $this->getTableName() . "` WHERE " . $where_clause;
         Log::debug($sql);
         /** @var $do Entity */
         $do = $this->getDataObjectName();
@@ -274,14 +276,16 @@ abstract class AbstractDao {
 
     private function getPrepareDeleteStatement(int $count): string {
         // DELETE FROM `tbl_name` WHERE `ID`=?[ OR `ID`=?]...
-        $sql = /** @lang text */ "DELETE FROM `" . $this->getTableName() . "` WHERE `ID`=?";
+        $sql = /** @lang text */
+            "DELETE FROM `" . $this->getTableName() . "` WHERE `ID`=?";
         $sql .= str_repeat(" OR `ID`=?", $count - 1);
         return $sql;
     }
 
     private function getPrepareSelectStatement(int $count): string {
         // SELECT * FROM `table_name` WHERE `ID`=?[ OR `ID`=?]...
-        $sql = /** @lang text */ "SELECT * FROM `" . $this->getTableName() . "` WHERE `ID`=?";
+        $sql = /** @lang text */
+            "SELECT * FROM `" . $this->getTableName() . "` WHERE `ID`=?";
         $sql .= str_repeat(" OR `ID`=?", $count - 1);
         return $sql;
     }

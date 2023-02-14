@@ -70,7 +70,7 @@ return [
                     "paras" => [
                         "filename" => "logs/unit/app.log",
                         "maxFiles" => 2,
-                        "level" => Level::Debug,
+                        "level" => Level::Info,
                         "bubble" => true,
                         "filePermission" => null,
                         "useLocking" => false

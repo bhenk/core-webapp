@@ -18,7 +18,7 @@ use function PHPUnit\Framework\assertNull;
 use function PHPUnit\Framework\assertStringStartsWith;
 use function PHPUnit\Framework\assertTrue;
 
-#[LogAttribute(true)]
+#[LogAttribute(false)]
 class AbstractDaoTest extends TestCase {
     use ConsoleLoggerTrait;
 

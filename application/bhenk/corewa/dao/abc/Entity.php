@@ -10,12 +10,12 @@ use function get_class;
 
 class Entity implements Stringable, EntityInterface {
 
+    function __construct(private readonly ?int $ID) {}
+
     public static function fromArray(array $arr): static {
         $rc = new ReflectionClass(static::class);
         return $rc->newInstanceArgs(array_values($arr));
     }
-
-    function __construct(private readonly ?int $ID) {}
 
     public function getID(): ?int {
         return $this->ID;
@@ -59,7 +59,7 @@ class Entity implements Stringable, EntityInterface {
             if ($prop->getType()->getName() == "string")
                 $val = "'" . $val . "'";
             $s .= "\t" . $prop->getName() . " ("
-                . $prop->getType()->getName() . ") -> " . $val. PHP_EOL;
+                . $prop->getType()->getName() . ") -> " . $val . PHP_EOL;
         }
         return $s;
     }

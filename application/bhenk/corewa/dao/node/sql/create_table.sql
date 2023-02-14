@@ -6,5 +6,6 @@ CREATE TABLE IF NOT EXISTS `tbl_node`
     alias     VARCHAR(255),
     nature    VARCHAR(25),
     public    BOOLEAN,
+    estimate  FLOAT,
     PRIMARY KEY (ID)
 );

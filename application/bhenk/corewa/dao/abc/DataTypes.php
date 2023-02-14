@@ -11,13 +11,12 @@ enum DataTypes: string {
     case bool = "BOOLEAN";
     case float = "FLOAT";
 
-    public static function fromName(string $name): string
-    {
+    public static function fromName(string $name): string {
         foreach (self::cases() as $type) {
-            if( $name === $type->name ){
+            if ($name === $type->name) {
                 return $type->value;
             }
         }
-        throw new ValueError("$name is not a valid backing value for enum " . self::class );
+        throw new ValueError("$name is not a valid backing value for enum " . self::class);
     }
 }
