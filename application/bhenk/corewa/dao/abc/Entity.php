@@ -1,14 +1,13 @@
-<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
+<?php
 
 namespace bhenk\corewa\dao\abc;
 
 use ReflectionClass;
-use Stringable;
 use function array_slice;
 use function array_values;
 use function get_class;
 
-class Entity implements Stringable, EntityInterface {
+class Entity implements EntityInterface {
 
     function __construct(private readonly ?int $ID) {}
 

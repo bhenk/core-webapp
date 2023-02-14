@@ -1,8 +1,10 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 
 namespace bhenk\corewa\dao\abc;
 
-interface EntityInterface {
+use Stringable;
+
+interface EntityInterface extends Stringable {
 
     public static function fromArray(array $arr): Entity;
 
@@ -11,5 +13,9 @@ interface EntityInterface {
     public function toArray(): array;
 
     public function clone(?int $ID): Entity;
+
+    public function equals(Entity $other): bool;
+
+    public function isSame(Entity $other): bool;
 
 }
