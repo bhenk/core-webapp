@@ -1,20 +1,21 @@
-<?php
+<?php /** @noinspection PhpMultipleClassDeclarationsInspection */
 
 namespace bhenk\corewa\dao\abc;
 
 use ReflectionClass;
+use Stringable;
 use function array_slice;
 use function array_values;
 use function get_class;
 
-class Entity implements EntityInterface {
-
-    function __construct(private readonly ?int $ID) {}
+class Entity implements Stringable, EntityInterface {
 
     public static function fromArray(array $arr): static {
         $rc = new ReflectionClass(static::class);
         return $rc->newInstanceArgs(array_values($arr));
     }
+
+    function __construct(private readonly ?int $ID) {}
 
     public function getID(): ?int {
         return $this->ID;
@@ -47,6 +48,20 @@ class Entity implements EntityInterface {
     public function isSame(Entity $other): bool {
         return $this->equals($other) and
             $this->getID() === $other->getID();
+    }
+
+    public function __toString(): string {
+        $s = get_class($this);
+        $rc = new ReflectionClass($this);
+        $s .= PHP_EOL;
+        foreach ($rc->getProperties() as $prop) {
+            $val = $prop->getValue($this);
+            if ($prop->getType()->getName() == "string")
+                $val = "'" . $val . "'";
+            $s .= "\t" . $prop->getName() . " ("
+                . $prop->getType()->getName() . ") -> " . $val. PHP_EOL;
+        }
+        return $s;
     }
 
 }

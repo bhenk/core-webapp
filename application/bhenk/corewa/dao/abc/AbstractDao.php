@@ -6,11 +6,15 @@ use bhenk\corewa\data\sql\MysqlConnector;
 use bhenk\corewa\logging\Log;
 use Exception;
 use ReflectionClass;
+use ReflectionException;
 use Throwable;
 use function array_slice;
 use function array_values;
+use function is_null;
 use function mysqli_report;
 use function rtrim;
+use function str_repeat;
+use function var_dump;
 
 abstract class AbstractDao {
 
@@ -18,7 +22,40 @@ abstract class AbstractDao {
 
     public abstract function getTableName(): string;
 
-    public abstract function getCreateTableStatement(): string;
+    /**
+     * Produces a minimal _CreateTableStatement_.
+     *
+     * ```
+     * CREATE TABLE IF NOT EXISTS `%table_name%`
+     * (
+     *      `ID`                INT NOT NULL AUTO_INCREMENT,
+     *      `%int_prop%`        INT,
+     *      `%string_prop%`     VARCHAR(255),
+     *      `%bool_prop%`       BOOLEAN,
+     *      PRIMARY KEY (`ID`)
+     * );
+     * ```
+     * _%xyz%_ is placeholder for table name or property name.
+     *
+     * Subclasses may override.
+     *
+     * @return string
+     * @throws ReflectionException
+     */
+    public function getCreateTableStatement(): string {
+        $sql = /** @lang text */
+            "CREATE TABLE IF NOT EXISTS `" . $this->getTableName() . "`\n(\n"
+            . "\t`ID` \tINT NOT NULL AUTO_INCREMENT";
+        foreach ((new ReflectionClass($this->getDataObjectName()))->getProperties() as $prop) {
+            $name = $prop->getName();
+            if ($name != "ID") {
+                $datatype = DataTypes::fromName($prop->getType()->getName());
+                $sql .= ",\n\t`" . $prop->getName() . "`\t" . $datatype;
+            }
+        }
+        $sql .= ",\n\tPRIMARY KEY (`ID`)\n);";
+        return $sql;
+    }
 
     public function createTable(bool $drop = false): int {
         $query = $drop ?
@@ -49,11 +86,13 @@ abstract class AbstractDao {
     }
 
     public function insertBatch(array $entity_array): array {
-        $sql = $this->getInsertStatement();
+        $sql = $this->getPrepareInsertStatement();
         Log::debug($sql);
         $new_entities = [];
+        $stmt = null;
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         try {
+            $row_count = 0;
             $conn = MysqlConnector::get()->getConnector();
             $stmt = $conn->prepare($sql);
             /** @var Entity $entity */
@@ -64,23 +103,29 @@ abstract class AbstractDao {
                     $ID = $stmt->insert_id;
                     $new_entities[] = $entity->clone($ID);
                     Log::debug("Inserted " . $entity::class . ", ID = " . $ID);
+                    $row_count += $stmt->affected_rows;
                 } else {
                     $msg = "Could not insert " . $this->getDataObjectName();
                     Log::error($msg, [$entity]);
                     throw new Exception($msg);
                 }
             }
+            Log::debug("INSERT row count: " . $row_count);
             return $new_entities;
         } catch (Throwable $e) {
             throw new Exception("Could not insert Entity", 201, $e);
+        } finally {
+            if (!is_null($stmt)) $stmt->close();
         }
     }
 
     public function updateBatch(array $entity_array): bool {
-        $sql = $this->getUpdateStatement();
+        $sql = $this->getPrepareUpdateStatement();
         Log::debug($sql);
+        $stmt = null;
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         try {
+            $row_count = 0;
             $conn = MysqlConnector::get()->getConnector();
             $stmt = $conn->prepare($sql);
             /** @var Entity $entity */
@@ -94,15 +139,110 @@ abstract class AbstractDao {
                     Log::error($msg, [$entity]);
                     throw new Exception($msg);
                 }
+                $row_count += $stmt->affected_rows;
             }
-            $stmt->close();
+            Log::debug("UPDATE row count: " . $row_count);
             return true;
         } catch (Throwable $e) {
             throw new Exception("Could not update Entity", 202, $e);
+        } finally {
+            if (!is_null($stmt)) $stmt->close();
         }
     }
 
-    private function getInsertStatement(): string {
+    public function delete(int $ID): int {
+        return $this->deleteBatch([$ID]);
+    }
+
+    public function deleteBatch(array $ids): int {
+        $sql = $this->getPrepareDeleteStatement(count($ids));
+        Log::debug($sql);
+        $stmt = null;
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        try {
+            $conn = MysqlConnector::get()->getConnector();
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($ids);
+            $row_count = $stmt->affected_rows;
+            Log::debug("DELETE row count: " . $row_count);
+            return $row_count;
+        } catch (Throwable $e) {
+            throw new Exception("Could not delete Entity", 203, $e);
+        } finally {
+            if (!is_null($stmt)) $stmt->close();
+        }
+    }
+
+    public function deleteWhere(string $where_clause): int {
+        $sql = /** @lang text */ "DELETE FROM `" . $this->getTableName() . "` WHERE " . $where_clause;
+        Log::debug($sql);
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        try {
+            $conn = MysqlConnector::get()->getConnector();
+            $conn->query($sql);
+            $row_count = $conn->affected_rows;
+            Log::debug("DELETE row count: " . $row_count);
+            return $row_count;
+        } catch (Throwable $e) {
+            throw new Exception("Could not delete Entity", 203, $e);
+        }
+    }
+
+    public function select(int $ID): ?Entity {
+        $selected = $this->selectBatch([$ID]);
+        return (count($selected) == 1) ? $selected[0] : null;
+    }
+
+    public function selectBatch(array $ids): array {
+        $sql = $this->getPrepareSelectStatement(count($ids));
+        Log::debug($sql);
+        $stmt = null;
+        /** @var $do Entity */
+        $do = $this->getDataObjectName();
+        $selected = [];
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        try {
+            $row_count = 0;
+            $conn = MysqlConnector::get()->getConnector();
+            $stmt = $conn->prepare($sql);
+            $stmt->execute($ids);
+            $result = $stmt->get_result();
+            while ($row = $result->fetch_assoc()) {
+                $selected[] = $do::fromArray($row);
+                $row_count++;
+            }
+            Log::debug("SELECT row count: " . $row_count);
+            return $selected;
+        } catch (Throwable $e) {
+            throw new Exception("Could not select Entity", 204, $e);
+        } finally {
+            if (!is_null($stmt)) $stmt->close();
+        }
+    }
+
+    public function selectWhere(string $where_clause): array {
+        $sql = /** @lang text */ "SELECT * FROM `" . $this->getTableName() . "` WHERE " . $where_clause;
+        Log::debug($sql);
+        /** @var $do Entity */
+        $do = $this->getDataObjectName();
+        $selected = [];
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+        try {
+            $row_count = 0;
+            $conn = MysqlConnector::get()->getConnector();
+            $result = $conn->query($sql);
+            while ($row = $result->fetch_assoc()) {
+                $selected[] = $do::fromArray($row);
+                $row_count++;
+            }
+            Log::debug("SELECT row count: " . $row_count);
+            return $selected;
+        } catch (Throwable $e) {
+            throw new Exception("Could not select Entity", 204, $e);
+        }
+    }
+
+    private function getPrepareInsertStatement(): string {
         // INSERT INTO tbl_node (parent_id, name, alias, nature) VALUES (?, ?, ?, ?)
         $s1 = /** @lang text */
             "INSERT INTO " . $this->getTableName() . " (";
@@ -117,8 +257,8 @@ abstract class AbstractDao {
         return rtrim($s1, ", ") . rtrim($s2, ", ") . ")";
     }
 
-    private function getUpdateStatement(): string {
-        // UPDATE tbl_node SET parent_id=?, name=?, alias=?, nature=?, public=? WHERE ID=?
+    private function getPrepareUpdateStatement(): string {
+        // UPDATE tbl_name SET parent_id=?, name=?, alias=?, nature=?, public=? WHERE ID=?
         $s1 = /** @lang text */
             "UPDATE "
             . $this->getTableName()
@@ -130,6 +270,20 @@ abstract class AbstractDao {
             }
         }
         return rtrim($s1, ", ") . " WHERE ID=?";
+    }
+
+    private function getPrepareDeleteStatement(int $count): string {
+        // DELETE FROM `tbl_name` WHERE `ID`=?[ OR `ID`=?]...
+        $sql = /** @lang text */ "DELETE FROM `" . $this->getTableName() . "` WHERE `ID`=?";
+        $sql .= str_repeat(" OR `ID`=?", $count - 1);
+        return $sql;
+    }
+
+    private function getPrepareSelectStatement(int $count): string {
+        // SELECT * FROM `table_name` WHERE `ID`=?[ OR `ID`=?]...
+        $sql = /** @lang text */ "SELECT * FROM `" . $this->getTableName() . "` WHERE `ID`=?";
+        $sql .= str_repeat(" OR `ID`=?", $count - 1);
+        return $sql;
     }
 
 }

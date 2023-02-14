@@ -3,6 +3,7 @@
 namespace bhenk\corewa\dao\node;
 
 use bhenk\corewa\dao\abc\AbstractDao;
+use bhenk\corewa\dao\abc\Entity;
 use function file_get_contents;
 
 class NodeDao extends AbstractDao {
@@ -17,9 +18,9 @@ class NodeDao extends AbstractDao {
         return self::TABLE_NAME;
     }
 
-    public function getCreateTableStatement(): string {
-        return file_get_contents(__DIR__ . "/sql/create_table.sql");
-    }
+//    public function getCreateTableStatement(): string {
+//        return file_get_contents(__DIR__ . "/sql/create_table.sql");
+//    }
 
 
 }

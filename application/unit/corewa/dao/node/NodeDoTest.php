@@ -4,13 +4,19 @@ namespace unit\corewa\dao\node;
 
 use bhenk\corewa\dao\abc\Entity;
 use bhenk\corewa\dao\node\NodeDo;
+use bhenk\corewa\logging\ConsoleLoggerTrait;
+use bhenk\corewa\logging\Log;
+use bhenk\corewa\logging\LogAttribute;
 use PHPUnit\Framework\TestCase;
+use function get_class;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertInstanceOf;
 use function PHPUnit\Framework\assertNotSame;
 use function PHPUnit\Framework\assertTrue;
 
+#[LogAttribute(false)]
 class NodeDoTest extends TestCase {
+    use ConsoleLoggerTrait;
 
     public function testConstructor() {
         $node1 = new NodeDo(1, 3, "my name", "my alias", "my nature");
@@ -32,7 +38,7 @@ class NodeDoTest extends TestCase {
         $node = new NodeDo(1, 3, "my name", "my alias", "my nature");
         $arr = $node->toArray();
         assertEquals(["ID" => 1, "parent_id" => 3, "name" => "my name", "alias" => "my alias",
-            "nature" => "my nature", "public" => true], $arr);
+            "nature" => "my nature", "public" => true, "estimate" => 0.0], $arr);
 
         $entity = new Entity(5);
         assertEquals(["ID" => 5], $entity->toArray());
@@ -56,6 +62,12 @@ class NodeDoTest extends TestCase {
         $node2 = $node1->clone(null);
         assertEquals(null, $node2->getID());
         assertTrue($node1->equals($node2));
+    }
+
+    public function test__toString() {
+        $node1 = new NodeDo(1, 3, "my name", "my alias", "my nature");
+        Log::debug("A NodeDo __toString():", [$node1]);
+        self::assertStringStartsWith(get_class($node1), $node1->__toString());
     }
 
 }

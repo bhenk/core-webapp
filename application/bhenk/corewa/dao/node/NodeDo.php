@@ -11,7 +11,8 @@ class NodeDo extends Entity {
                          private ?string       $name = null,
                          private ?string       $alias = null,
                          private ?string       $nature = null,
-                         private bool          $public = true
+                         private bool          $public = true,
+                         private float         $estimate = 0.0
     ) {
         parent::__construct($this->ID);
     }
@@ -84,6 +85,20 @@ class NodeDo extends Entity {
      */
     public function setPublic(bool $public): void {
         $this->public = $public;
+    }
+
+    /**
+     * @return float
+     */
+    public function getEstimate(): float {
+        return $this->estimate;
+    }
+
+    /**
+     * @param float $estimate
+     */
+    public function setEstimate(float $estimate): void {
+        $this->estimate = $estimate;
     }
 
 }
