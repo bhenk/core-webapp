@@ -8,13 +8,23 @@
       "name": "henk van den berg"
     }
   ],
+  "repositories": [
+    {
+      "type": "path",
+      "url": "../doc2rst",
+      "options": {
+        "symlink": true
+      }
+    }
+  ],
   "require": {
     "php": ">=8.2",
     "monolog/monolog": "3.2.*",
     "ext-mysqli": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5"
+    "phpunit/phpunit": "^9.5",
+    "bhenk/doc2rst" : "dev-main"
   },
   "autoload": {
     "psr-4": {"bhenk\\": "application/bhenk"}

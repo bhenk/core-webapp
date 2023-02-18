@@ -5,3 +5,5 @@
 /.phpunit.result.cache
 /application/logs/
 /tools/
+/docs/_build/
+/docs/_static/

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bcab6d452863dead25930d909895a3f2",
+    "content-hash": "efd1addc70dec2047f72043df93f432f",
     "packages": [
         {
             "name": "monolog/monolog",
@@ -160,6 +160,40 @@
         }
     ],
     "packages-dev": [
+        {
+            "name": "bhenk/doc2rst",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../doc2rst",
+                "reference": "600a036a68df15869a06319564f2896f3db750e4"
+            },
+            "require": {
+                "php": ">=8.2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "bhenk\\": "application/bhenk"
+                }
+            },
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "henk van den berg"
+                }
+            ],
+            "description": "phpdocs to rst crawler",
+            "transport-options": {
+                "symlink": true,
+                "relative": true
+            }
+        },
         {
             "name": "doctrine/instantiator",
             "version": "2.0.x-dev",
@@ -791,12 +825,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "796aeeaa688d8bc7730f0e6d00ccebb380bd21cc"
+                "reference": "4e6f3c050b54192d0a28c6f314a3567c00a7d017"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/796aeeaa688d8bc7730f0e6d00ccebb380bd21cc",
-                "reference": "796aeeaa688d8bc7730f0e6d00ccebb380bd21cc",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/4e6f3c050b54192d0a28c6f314a3567c00a7d017",
+                "reference": "4e6f3c050b54192d0a28c6f314a3567c00a7d017",
                 "shasum": ""
             },
             "require": {
@@ -885,7 +919,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-02-11T08:52:39+00:00"
+            "time": "2023-02-14T15:49:39+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -1904,7 +1938,9 @@
     ],
     "aliases": [],
     "minimum-stability": "dev",
-    "stability-flags": [],
+    "stability-flags": {
+        "bhenk/doc2rst": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
